@@ -59,6 +59,7 @@ end
 
 if type -q lazygit
     set -gx CONFIG_DIR $XDG_CONFIG_HOME/lazygit
+    abbr lg lazygit
 end
 
 if type -q fzf
@@ -74,6 +75,6 @@ end
 
 if type -q dua
     set -gx EZA_CONFIG_DIR $XDG_CONFIG_HOME/eza
-    alias du="dua"
-    alias dui="dua i"
+    abbr --add du dua
+    abbr --add dui dua i
 end
