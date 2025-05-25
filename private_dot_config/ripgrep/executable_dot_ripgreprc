@@ -1,0 +1,13 @@
+--no-messages
+--column 
+--line-number 
+--no-heading 
+--color=always 
+
+--smart-case 
+--hidden
+
+--max-columns=150 
+--max-columns-preview 
+
+--trim 
