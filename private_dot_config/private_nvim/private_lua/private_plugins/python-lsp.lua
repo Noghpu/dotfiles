@@ -48,7 +48,7 @@ return {
                   -- Core Python errors (highly recommended)
                   "E", -- pycodestyle errors
                   "F", -- Pyflakes (undefined names, unused imports, etc.)
-                  "W", -- pycodestyle warnings
+                  -- "W", -- pycodestyle warnings
 
                   -- Bug detection
                   "B", -- flake8-bugbear (common bugs and design problems)
@@ -72,12 +72,12 @@ return {
                   "TCH", -- flake8-type-checking (TYPE_CHECKING blocks)
 
                   -- Documentation
-                  "D", -- pydocstyle (docstring style)
+                  -- "D", -- pydocstyle (docstring style)
 
                   -- Code style
-                  "Q", -- flake8-quotes
-                  "COM", -- flake8-commas (trailing commas)
-                  "ISC", -- flake8-implicit-str-concat
+                  -- "Q", -- flake8-quotes
+                  -- "COM", -- flake8-commas (trailing commas)
+                  -- "ISC", -- flake8-implicit-str-concat
 
                   -- Error handling
                   "EM", -- flake8-errmsg (exception messages)
@@ -119,7 +119,7 @@ return {
                   "PL", -- Pylint rules (PLC, PLE, PLR, PLW)
 
                   -- Print statements (comment out if you use print for debugging)
-                  "T20", -- flake8-print
+                  -- "T20", -- flake8-print
 
                   -- Debugging (comment out during development)
                   -- "T10",  -- flake8-debugger (debugger statements)
@@ -155,6 +155,17 @@ return {
                   "D203", -- conflicts with D211 (blank line before class docstring)
                   "D213", -- conflicts with D212 (multi-line docstring summary)
                   -- "E501",  -- line too long (handled by formatter)
+                  "W191", -- tab-indentation
+                  "E111", -- indentation-with-invalid-multiple
+                  "E114", -- indentation-with-invalid-multiple-comment
+                  "E117", -- over-indented
+                  "Q000", -- bad-quotes-inline-string
+                  "Q001", -- bad-quotes-multiline-string
+                  "Q002", -- bad-quotes-docstring
+                  "Q003", -- avoidable-escaped-quote
+                  "COM812", -- missing-trailing-comma
+                  "COM819", -- prohibited-trailing-comma
+                  "ISC001", -- single-line-implicit-string-concatenation
                 },
               },
             },
