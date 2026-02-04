@@ -1,155 +1,108 @@
-# Get editor completions based on the config schema
-"$schema" = 'https://starship.rs/config-schema.json'
+# Minimal Starship Prompt - Catppuccin Mocha
 
-#Format
 format = """
-[](green)\
-$container\
+$os\
 $username\
-[](fg:green bg:teal)\
+$hostname\
 $directory\
-[](fg:teal bg:sky)\
 $git_branch\
 $git_status\
-[](fg:sky bg:sapphire)\
-[](fg:sapphire bg:blue)\
-$docker_context\
-$conda\
-[](fg:blue bg:lavender)\
+$fill\
 $time\
-[ ](fg:lavender)\
-$line_break$character"""
+$cmd_duration\
+$line_break\
+$character"""
 
-# Sets user-defined palette
-# Palettes must be defined _after_ this line
-palette = "catppuccin_mocha"
+# Catppuccin Mocha palette differentiates modules without separators
 
-# Starship modules
+[os]
+disabled = false
+style = "#b4befe"  # lavender
+
+[os.symbols]
+Windows = ""
+Ubuntu = "󰕈"
+SUSE = ""
+Raspbian = "󰐿"
+Mint = "󰣭"
+Macos = "󰀵"
+Manjaro = ""
+Linux = "󰌽"
+Gentoo = "󰣨"
+Fedora = "󰣛"
+Alpine = ""
+Amazon = ""
+Android = ""
+AOSC = ""
+Arch = "󰣇"
+Artix = "󰣇"
+CentOS = ""
+Debian = "󰣚"
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
+
 [username]
-style_user = "bg:green fg:surface1"
-style_root = "bg:green fg:subtext1"
-detect_env_vars = ['WSL_SESSION', 'SSH_CONNECTION']
-format = "[ $user ]($style)"
-
-[container]
-style = "bg:green fg:surface1"
-format = '[$symbol \[$name\]]($style)'
-
-[directory]
-format = "[ $path ]($style)"
-truncation_length = 3
-truncation_symbol = "…/"
-style = "fg:surface1 bg:teal"
+show_always = true
+style_user = "#f5c2e7"  # pink
+style_root = "#f38ba8"  # red
+format = "[ $user]($style)"
 
 [hostname]
-ssh_only = false
-detect_env_vars = ['WSL_SESSION', 'SSH_CONNECTION']
-disabled = false
-style = "bg:green fg:surface1"
+ssh_only = true
+style = "#cba6f7"  # mauve
+format = "@[$hostname]($style) "
+
+[directory]
+style = "#a6e3a1"  # green
+format = " [$path]($style)"
+truncation_length = 3
+truncate_to_repo = true
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = "󰝚 "
+"Pictures" = " "
+"Developer" = "󰲋 "
 
 [git_branch]
+style = "#fab387"  # peach
+format = " [$symbol$branch]($style)"
 symbol = ""
-style = "bg:sky"
-format = '[[ $symbol $branch ](fg:surface1 bg:sky)]($style)'
 
 [git_status]
-style = "bg:sky"
-format = '[[($all_status$ahead_behind )](fg:surface1 bg:sky)]($style)'
+style = "#f9e2af"  # yellow
+format = "[$all_status$ahead_behind]($style)"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+conflicted = "="
+untracked = "?"
+stashed = "$"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+[fill]
 disabled = true
-
-[nodejs]
-symbol = ""
-style = "bg:sapphire"
-format = '[[ $symbol( $version) ](fg:surface1 bg:sapphire)]($style)'
-
-[c]
-symbol = " "
-style = "bg:sapphire"
-format = '[[ $symbol( $version) ](fg:surface1 bg:sapphire)]($style)'
-
-[rust]
-symbol = ""
-style = "bg:sapphire"
-format = '[[ $symbol( $version) ](fg:surface1 bg:sapphire)]($style)'
-
-[golang]
-symbol = ""
-style = "bg:sapphire"
-format = '[[ $symbol( $version) ](fg:surface1 bg:sapphire)]($style)'
-
-[php]
-symbol = ""
-style = "bg:sapphire"
-format = '[[ $symbol( $version) ](fg:surface1 bg:sapphire)]($style)'
-
-[java]
-symbol = " "
-style = "bg:sapphire"
-format = '[[ $symbol( $version) ](fg:surface1 bg:sapphire)]($style)'
-
-[kotlin]
-symbol = ""
-style = "bg:sapphire"
-format = '[[ $symbol( $version) ](fg:surface1 bg:sapphire)]($style)'
-
-[haskell]
-symbol = ""
-style = "bg:sapphire"
-format = '[[ $symbol( $version) ](fg:surface1 bg:sapphire)]($style)'
-
-[python]
-symbol = ""
-style = "bg:sapphire"
-format = '[[ $symbol( $version) (\(${virtualenv}\))](fg:surface1 bg:sapphire)]($style)'
-
-[docker_context]
-symbol = ""
-style = "bg:sapphire"
-format = '[[ $symbol( $context) ](fg:surface1 bg:sapphire)]($style)'
-
-[conda]
-style = "bg:sapphire"
-format = '[[ $symbol( $environment) ](fg:surface1 bg:sapphire)]($style)'
+symbol = " "
 
 [time]
 disabled = false
+style = "#89dceb"  # sky
+format = "[  $time]($style)"
 time_format = "%R"
-style = "bg:lavender"
-format = '[[  $time ](fg:surface1 bg:lavender)]($style)'
+
+[cmd_duration]
+style = "#94e2d5"  # teal
+format = " [$duration]($style)"
+min_time = 1000
 
 [line_break]
 disabled = false
 
 [character]
-# Note the use of Catppuccin color 'peach'
-success_symbol = "[[󰄛](green) ❯](green)"
-error_symbol = "[[󰄛](red) ❯](red)"
-vimcmd_symbol = "[󰄛 ❮](surface1)"        # For use with zsh-vi-mode
-
-[palettes.catppuccin_mocha]
-rosewater = "#f5e0dc"
-flamingo = "#f2cdcd"
-pink = "#f5c2e7"
-mauve = "#cba6f7"
-red = "#f38ba8"
-maroon = "#eba0ac"
-peach = "#fab387"
-yellow = "#f9e2af"
-green = "#a6e3a1"
-teal = "#94e2d5"
-sky = "#89dceb"
-sapphire = "#74c7ec"
-blue = "#89b4fa"
-lavender = "#b4befe"
-text = "#cdd6f4"
-subtext1 = "#bac2de"
-subtext0 = "#a6adc8"
-overlay2 = "#9399b2"
-overlay1 = "#7f849c"
-overlay0 = "#6c7086"
-surface2 = "#585b70"
-surface1 = "#45475a"
-surface0 = "#313244"
-base = "#1e1e2e"
-mantle = "#181825"
-crust = "#11111b"
+success_symbol = "[❯](bold #a6e3a1)"  # green
+error_symbol = "[❯](bold #f38ba8)"    # red
