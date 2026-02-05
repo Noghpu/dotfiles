@@ -1,8 +1,8 @@
 git:
+  autoFetch: true
   paging:
     colorArg: always
-    useConfig: true
-    pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}
+    pager: delta --dark --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
 gui:
   sidePanelWidth: 0.2
 
@@ -22,6 +22,12 @@ gui:
 
   # If true, show the command log
   showCommandLog: false
+
+  # Disable random tips on startup
+  showRandomTip: false
+
+  # Hide bottom line with keybinding hints
+  showBottomLine: false
 
   nerdFontsVersion: "3"
 
@@ -50,6 +56,8 @@ gui:
       "*": "#b4befe"
 
   portraitMode: auto
+
+promptToReturnFromSubprocess: false
 
 os:
   editPreset: "nvim"

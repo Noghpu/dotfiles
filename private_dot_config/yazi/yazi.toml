@@ -1,0 +1,10 @@
+# Yazi config - only overrides from defaults
+# https://yazi-rs.github.io/docs/configuration/yazi/
+
+[mgr]
+sort_by    = "natural"  # file2 before file10 (default: alphabetical)
+linemode   = "size"     # show file sizes (default: none)
+
+[preview]
+max_width  = 1200       # better image previews (default: 600)
+max_height = 1800       # better image previews (default: 900)
