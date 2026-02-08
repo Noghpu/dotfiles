@@ -3,7 +3,7 @@ set -gx EDITOR nvim
 # for headless gpg git credential manager
 set -gx GPG_TTY (tty)
 
-fish_add_path ~/.cargo/bin/
-fish_add_path ~/.local/bin/
+# Append common directories for executable files to $PATH
+fish_add_path ~/.local/bin ~/.cargo/bin ~/Applications/depot_tools
 
 enable_transience

@@ -1,5 +1,4 @@
-set pkgs (pacman -Qqe)
-if not contains uutils-coreutils pkgs
+if not type -q uu-cp
     return
 end
 

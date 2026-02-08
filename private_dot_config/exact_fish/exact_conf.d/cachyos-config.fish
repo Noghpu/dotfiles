@@ -20,10 +20,6 @@ if test -f ~/.fish_profile
     source ~/.fish_profile
 end
 
-# Append common directories for executable files to $PATH
-fish_add_path ~/.local/bin ~/.cargo/bin ~/Applications/depot_tools
-
-## Functions
 # Functions needed for !! and !$ https://github.com/oh-my-fish/plugin-bang-bang
 function __history_previous_command
     switch (commandline -t)
@@ -52,14 +48,6 @@ else
     bind ! __history_previous_command
     bind '$' __history_previous_command_arguments
 end
-
-## Useful aliases
-# Replace ls with eza
-alias ls='eza -al --color=always --group-directories-first --icons=always' # preferred listing
-alias la='eza -a --color=always --group-directories-first --icons=always' # all files and dirs
-alias ll='eza -l --color=always --group-directories-first --icons=always' # long format
-alias lt='eza -aT --color=always --group-directories-first --icons=always' # tree listing
-alias l.="eza -a | grep -e '^\.'" # show only dotfiles
 
 # Common use
 abbr -a grubup sudo grub-mkconfig -o /boot/grub/grub.cfg

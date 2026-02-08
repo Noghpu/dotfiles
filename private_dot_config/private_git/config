@@ -1,5 +1,6 @@
 [include]
     path = ~/.config/git/catppuccin.gitconfig
+    path = ~/.config/git/user.gitconfig
 
 [core]
     pager = delta
@@ -23,3 +24,6 @@
 
 [init]
     defaultBranch = main
+
+[credential]
+    helper = manager

@@ -26,9 +26,6 @@ gui:
   # Disable random tips on startup
   showRandomTip: false
 
-  # Hide bottom line with keybinding hints
-  showBottomLine: false
-
   nerdFontsVersion: "3"
 
   theme:

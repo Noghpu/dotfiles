@@ -6,20 +6,26 @@ vim.g.snacks_animate = false
 vim.o.shell = "fish"
 
 -- OSC 52 clipboard for SSH yanking (async, no paste delay)
-vim.o.clipboard = "unnamedplus"
+local is_windows = vim.uv.os_uname().sysname:find("Windows") ~= nil
 
-vim.g.clipboard = {
-  name = "OSC 52",
-  copy = {
-    ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
-    ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
-  },
-  paste = {
-    ["+"] = function()
-      return { vim.fn.getreg("0", 1, true), vim.fn.getregtype("0") }
-    end,
-    ["*"] = function()
-      return { vim.fn.getreg("0", 1, true), vim.fn.getregtype("0") }
-    end,
-  },
-}
+if is_windows then
+  vim.g.clipboard = {
+    name = "OSC 52",
+    copy = {
+      ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
+      ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
+    },
+    paste = {
+      ["+"] = function()
+        return { vim.fn.getreg("0", 1, true), vim.fn.getregtype("0") }
+      end,
+      ["*"] = function()
+        -- Fall back to "0 register for fast paste
+        return { vim.fn.getreg("0", 1, true), vim.fn.getregtype("0") }
+      end,
+    },
+  }
+
+  -- Set after g:clipboard so Neovim uses the custom provider
+  vim.o.clipboard = "unnamedplus"
+end
