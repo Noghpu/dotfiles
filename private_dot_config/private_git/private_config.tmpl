@@ -3,15 +3,14 @@
     path = ~/.config/git/user.gitconfig
 
 [core]
-{{ if lookPath "delta" -}}
+{{- if lookPath "delta" }}
     pager = delta
-{{ end -}}
-{{ if eq .chezmoi.os "windows" -}}
+{{- end }}
+{{- if eq .chezmoi.os "windows" }}
     autocrlf = true
-{{ else -}}
+{{- else }}
     autocrlf = input
-{{ end -}}
-
+{{- end }}
 
 {{ if lookPath "delta" -}}
 [interactive]
