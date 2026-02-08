@@ -3,7 +3,9 @@
     path = ~/.config/git/user.gitconfig
 
 [core]
+    {{ if lookPath "delta" }}
     pager = delta
+    {{ end }}
     {{ if eq .chezmoi.os "windows" -}}
     autocrlf = true
     {{ else -}}
@@ -11,6 +13,7 @@
     {{ end -}}
 
 
+{{ if lookPath "delta" }}
 [interactive]
     diffFilter = delta --color-only
 
@@ -18,9 +21,8 @@
     navigate = true  # use n and N to move between diff sections
     dark = true      # or light = true, or omit for auto-detection
     side-by-side = true
-    paging = never
-    diff-so-fancy = true
     features = catppuccin-mocha
+{{ end }}
 
 [merge]
     conflictstyle = zdiff3
