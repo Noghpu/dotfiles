@@ -5,7 +5,7 @@ if command -q eza
         touch $XDG_CONFIG_HOME/eza/theme.yml
     end
 
-    alias la='eza -la --color=always --group-directories-first --icons=always' # all files and dirs`
+    alias la='eza -lao --no-permissions --color=always --group-directories-first --icons=always' # all files and dirs`
     alias ll='eza -l --color=always --group-directories-first --icons=always' # long format
     alias lt='eza -aT --color=always --group-directories-first --icons=always' # tree listing
     alias l.="eza -a | grep -e '^\.'" # show only dotfiles
