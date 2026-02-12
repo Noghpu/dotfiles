@@ -6,8 +6,7 @@ vim.g.snacks_animate = false
 vim.o.shell = "fish"
 
 -- OSC 52 clipboard for SSH yanking (async, no paste delay)
-local is_windows = vim.uv.os_uname().sysname:find("Windows") ~= nil
-
+local is_windows = vim.env.LC_CLIENT_OS == "windows"
 if is_windows then
   vim.g.clipboard = {
     name = "OSC 52",
