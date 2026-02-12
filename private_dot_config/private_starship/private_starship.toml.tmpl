@@ -1,6 +1,7 @@
 # Minimal Starship Prompt - Catppuccin Mocha
 
 format = """
+$env_var_TMUX\
 $os\
 $username\
 $hostname\
@@ -22,26 +23,26 @@ disabled = false
 style = "#b4befe"  # lavender
 
 [os.symbols]
-Windows = ""
-Ubuntu = "󰕈"
-SUSE = ""
-Raspbian = "󰐿"
-Mint = "󰣭"
-Macos = "󰀵"
-Manjaro = ""
-Linux = "󰌽"
-Gentoo = "󰣨"
-Fedora = "󰣛"
-Alpine = ""
-Amazon = ""
-Android = ""
-AOSC = ""
-Arch = "󰣇"
-Artix = "󰣇"
-CentOS = ""
-Debian = "󰣚"
-Redhat = "󱄛"
-RedHatEnterprise = "󱄛"
+Windows = "\uE62A"
+Ubuntu = "\U000F0548"
+SUSE = "\uF314"
+Raspbian = "\U000F043F"
+Mint = "\U000F04ED"
+Macos = "\U000F0035"
+Manjaro = "\uF312"
+Linux = "\U000F033D"
+Gentoo = "\U000F04E8"
+Fedora = "\U000F04DB"
+Alpine = "\uF300"
+Amazon = "\uF270"
+Android = "\uF17B"
+AOSC = "\uF301"
+Arch = "\U000F04C7"
+Artix = "\U000F04C7"
+CentOS = "\uF304"
+Debian = "\U000F04DA"
+Redhat = "\U000F111B"
+RedHatEnterprise = "\U000F111B"
 
 [username]
 show_always = true
@@ -62,11 +63,17 @@ truncate_to_repo = true
 truncation_symbol = "…/"
 
 [directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = "󰝚 "
-"Pictures" = " "
-"Developer" = "󰲋 "
+"Documents" = "\U000F0219 "
+"Downloads" = "\uF019 "
+"Music" = "\U000F075A "
+"Pictures" = "\uF03E "
+"Developer" = "\U000F04CB "
+
+[env_var.TMUX]
+symbol = "\uF489 "
+style = "#f9e2af"  # yellow
+default = ""
+format = "[$symbol]($style)"
 
 {{ if ne .chezmoi.os "windows" -}}
 [git_branch]
@@ -96,7 +103,7 @@ symbol = " "
 [time]
 disabled = false
 style = "#89dceb"  # sky
-format = "[  $time]($style)"
+format = "[ \uF017 $time]($style)"
 time_format = "%R"
 
 [cmd_duration]
