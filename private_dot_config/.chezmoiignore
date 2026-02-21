@@ -1,3 +1,42 @@
-{{- if eq .chezmoi.os "windows" }}
-exact_fish/
+{{- if not (or (lookPath "bat") (lookPath "batcat")) }}
+bat/
+{{- end }}
+{{- if not (lookPath "btop") }}
+btop/
+{{- end }}
+{{- if not (lookPath "eza") }}
+eza/
+{{- end }}
+{{- if not (lookPath "fish") }}
+fish/
+{{- end }}
+{{- if not (lookPath "git") }}
+git/
+{{- end }}
+{{- if not (lookPath "jj") }}
+jj/
+{{- end }}
+{{- if not (lookPath "lazygit") }}
+lazygit/
+{{- end }}
+{{- if not (lookPath "niri") }}
+niri/
+{{- end }}
+{{- if not (lookPath "nu") }}
+nushell/
+{{- end }}
+{{- if not (lookPath "nvim") }}
+nvim/
+{{- end }}
+{{- if not (lookPath "rg") }}
+ripgrep/
+{{- end }}
+{{- if not (lookPath "starship") }}
+starship/
+{{- end }}
+{{- if not (lookPath "tmux") }}
+tmux/
+{{- end }}
+{{- if not (lookPath "yazi") }}
+yazi/
 {{- end }}
