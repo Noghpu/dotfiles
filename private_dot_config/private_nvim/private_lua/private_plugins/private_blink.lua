@@ -14,7 +14,7 @@ return {
         trigger = { prefetch_on_insert = false },
       },
       sources = {
-        default = { "lsp", "path", "snippets", "buffer" },
+        default = { "lsp", "buffer", "path", "snippets" },
       },
     },
   },
