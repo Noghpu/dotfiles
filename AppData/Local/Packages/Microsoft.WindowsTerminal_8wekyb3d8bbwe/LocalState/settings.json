@@ -25,6 +25,10 @@
             "keys": "ctrl+shift+d"
         },
         {
+            "id": null,
+            "keys": "alt+left"
+        },
+        {
             "id": "Terminal.SwapPaneRight",
             "keys": "ctrl+alt+shift+right"
         },
@@ -34,7 +38,7 @@
         },
         {
             "id": null,
-            "keys": "alt+left"
+            "keys": "alt+right"
         },
         {
             "id": null,
@@ -42,15 +46,11 @@
         },
         {
             "id": null,
-            "keys": "alt+right"
+            "keys": "alt+shift+d"
         },
         {
             "id": null,
             "keys": "ctrl+plus"
-        },
-        {
-            "id": null,
-            "keys": "alt+shift+d"
         },
         {
             "id": null,
@@ -65,12 +65,12 @@
             "keys": "alt+up"
         },
         {
-            "id": null,
-            "keys": "ctrl+v"
-        },
-        {
             "id": "Terminal.FindText",
             "keys": "ctrl+shift+f"
+        },
+        {
+            "id": null,
+            "keys": "ctrl+v"
         },
         {
             "id": null,
@@ -78,7 +78,7 @@
         },
         {
             "id": null,
-            "keys": "ctrl+numpad0"
+            "keys": "ctrl+shift+pgup"
         },
         {
             "id": null,
@@ -86,11 +86,7 @@
         },
         {
             "id": null,
-            "keys": "ctrl+shift+pgup"
-        },
-        {
-            "id": null,
-            "keys": "alt+shift+down"
+            "keys": "ctrl+numpad0"
         },
         {
             "id": null,
@@ -98,27 +94,31 @@
         },
         {
             "id": null,
-            "keys": "alt+shift+left"
-        },
-        {
-            "id": null,
-            "keys": "ctrl+alt+1"
-        },
-        {
-            "id": "Terminal.SwapPaneDown",
-            "keys": "ctrl+alt+shift+down"
+            "keys": "alt+shift+down"
         },
         {
             "id": "Terminal.IncreaseFontSize",
             "keys": "ctrl+shift+plus"
         },
         {
+            "id": "Terminal.SwapPaneDown",
+            "keys": "ctrl+alt+shift+down"
+        },
+        {
             "id": null,
-            "keys": "alt+shift+right"
+            "keys": "ctrl+alt+1"
+        },
+        {
+            "id": null,
+            "keys": "alt+shift+left"
         },
         {
             "id": null,
             "keys": "ctrl+alt+5"
+        },
+        {
+            "id": null,
+            "keys": "alt+shift+right"
         },
         {
             "id": null,
@@ -134,23 +134,15 @@
         },
         {
             "id": null,
-            "keys": "ctrl+alt+2"
-        },
-        {
-            "id": null,
             "keys": "ctrl+alt+9"
         },
         {
             "id": null,
+            "keys": "ctrl+alt+2"
+        },
+        {
+            "id": null,
             "keys": "ctrl+alt+3"
-        },
-        {
-            "id": null,
-            "keys": "ctrl+alt+4"
-        },
-        {
-            "id": null,
-            "keys": "ctrl+alt+7"
         },
         {
             "id": "Terminal.SplitPaneDown",
@@ -158,15 +150,23 @@
         },
         {
             "id": null,
-            "keys": "ctrl+alt+6"
+            "keys": "ctrl+alt+7"
         },
         {
             "id": null,
-            "keys": "ctrl+alt+8"
+            "keys": "ctrl+alt+4"
+        },
+        {
+            "id": null,
+            "keys": "ctrl+alt+6"
         },
         {
             "id": "Terminal.SwapPaneLeft",
             "keys": "ctrl+alt+shift+left"
+        },
+        {
+            "id": null,
+            "keys": "ctrl+alt+8"
         },
         {
             "id": "Terminal.PrevTab",
@@ -320,6 +320,7 @@
             },
             {
                 "colorScheme": "Catppuccin Mocha",
+                "commandline": "C:\\WINDOWS\\system32\\wsl.exe --distribution-id {a845c68e-2237-4b6a-9483-aaf1f012aa2b}",
                 "guid": "{b32a6610-539d-5cb6-ac40-02452d57568a}",
                 "hidden": false,
                 "name": "FedoraLinux-43",
@@ -350,6 +351,18 @@
                 "hidden": true,
                 "name": "Azure Cloud Shell",
                 "source": "Windows.Terminal.Azure"
+            },
+            {
+                "guid": "{a6c55d0e-911c-555f-8d88-bc11494bfb81}",
+                "hidden": false,
+                "name": "Developer Command Prompt for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
+            },
+            {
+                "guid": "{a5b471e6-4f68-5561-be9b-d5eae00285f6}",
+                "hidden": false,
+                "name": "Developer PowerShell for VS 18",
+                "source": "Windows.Terminal.VisualStudio"
             }
         ]
     },
