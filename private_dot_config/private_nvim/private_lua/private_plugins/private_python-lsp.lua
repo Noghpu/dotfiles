@@ -9,7 +9,7 @@ return {
 			},
 		},
 	},
-	-- Configure ty and ruff LSPs
+	-- Configure pyrefly, ty, and ruff LSPs
 	{
 		"neovim/nvim-lspconfig",
 		opts = {
@@ -18,6 +18,7 @@ return {
 				pyrefly = {
 					init_options = {
 						pyrefly = {
+							displayTypeErrors = "force-on",
 							disableLanguageServices = false,
 							analysis = {
 								diagnosticMode = "workspace",
@@ -35,17 +36,13 @@ return {
 				ty = {
 					settings = {
 						ty = {
-							-- Enable workspace-wide diagnostics
 							diagnosticMode = "workspace",
-							-- Enable inlay hints
 							inlayHints = {
 								variableTypes = true,
 								callArgumentNames = true,
 							},
-							-- Strict rule configuration
 							configuration = {
 								rules = {
-									-- Enable warning-level rules as errors for strictness
 									["possibly-unresolved-reference"] = "error",
 									["division-by-zero"] = "warn",
 									["deprecated"] = "error",
@@ -56,151 +53,138 @@ return {
 						},
 					},
 				},
-				-- ruff as linter LSP (strict settings)
+				-- ruff linter/formatter LSP — mirrors ruff.toml as fallback
 				ruff = {
+					on_attach = function(client)
+						client.server_capabilities.hoverProvider = false
+					end,
 					init_options = {
 						settings = {
+							configurationPreference = "filesystemFirst",
+							lineLength = 88,
+							targetVersion = "py313",
 							lint = {
-								select = {
-									-- Core Python errors (highly recommended)
-									"E", -- pycodestyle errors
-									"F", -- Pyflakes (undefined names, unused imports, etc.)
-									-- "W", -- pycodestyle warnings
-
-									-- Bug detection
-									"B", -- flake8-bugbear (common bugs and design problems)
-									"S", -- flake8-bandit (security issues)
-									"A", -- flake8-builtins (shadowing builtins)
-
-									-- Code quality
-									"C4", -- flake8-comprehensions (unnecessary comprehensions)
-									"N", -- pep8-naming (naming conventions)
-									"UP", -- pyupgrade (upgrade syntax for newer Python)
-									"RUF", -- Ruff-specific rules
-
-									-- Import organization
-									"I", -- isort (import sorting)
-									"ICN", -- flake8-import-conventions
-									"TID", -- flake8-tidy-imports
-
-									-- Type checking related
-									"ANN", -- flake8-annotations (type annotation presence)
-									"TCH", -- flake8-type-checking (TYPE_CHECKING blocks)
-
-									-- Documentation
-									-- "D", -- pydocstyle (docstring style)
-
-									-- Code style
-									-- "Q", -- flake8-quotes
-									-- "COM", -- flake8-commas (trailing commas)
-									-- "ISC", -- flake8-implicit-str-concat
-
-									-- Error handling
-									"EM", -- flake8-errmsg (exception messages)
-									"TRY", -- tryceratops (exception handling)
-									"RSE", -- flake8-raise
-
-									-- Logging
-									"LOG", -- flake8-logging
-									"G", -- flake8-logging-format
-
-									-- Testing
-									"PT", -- flake8-pytest-style
-
-									-- Simplification
-									"SIM", -- flake8-simplify
-									"PIE", -- flake8-pie (misc. lints)
-
-									-- Return statements
-									"RET", -- flake8-return
-
-									-- Unused code
-									"ARG", -- flake8-unused-arguments
-									"ERA", -- eradicate (commented-out code)
-
-									-- Pathlib
-									"PTH", -- flake8-use-pathlib
-
-									-- Async
-									"ASYNC", -- flake8-async
-
-									-- Slots
-									"SLOT", -- flake8-slots
-
-									-- Performance
-									"PERF", -- Perflint
-
-									-- Refactoring
-									"FURB", -- refurb (modernization)
-									"PL", -- Pylint rules (PLC, PLE, PLR, PLW)
-
-									-- Print statements (comment out if you use print for debugging)
-									-- "T20", -- flake8-print
-
-									-- Debugging (comment out during development)
-									-- "T10",  -- flake8-debugger (debugger statements)
-
-									-- Boolean trap (can be noisy)
-									-- "FBT",  -- flake8-boolean-trap
-
-									-- Blanket exceptions (can be noisy)
-
-									-- Boolean trap (can be noisy)
-									-- "BLE",  -- flake8-blind-except
-
-									-- Self usage (can be noisy)
-									-- "SLF",  -- flake8-self
-
-									-- Pandas specific (enable if using pandas)
-									-- "PD",   -- pandas-vet
-
-									-- NumPy specific (enable if using numpy)
-									-- "NPY",  -- NumPy-specific rules
-
-									-- Django specific (enable if using Django)
-									-- "DJ",   -- flake8-django
-
-									-- FastAPI specific (enable if using FastAPI)
-									-- "FAST", -- FastAPI rules
-
-									-- Airflow specific (enable if using Airflow)
-									-- "AIR",  -- Airflow rules
-								},
+								preview = true,
+								select = { "ALL" },
 								ignore = {
-									"D203", -- conflicts with D211 (blank line before class docstring)
-									"D213", -- conflicts with D212 (multi-line docstring summary)
-									-- "E501",  -- line too long (handled by formatter)
-									"W191", -- tab-indentation
-									"E111", -- indentation-with-invalid-multiple
-									"E114", -- indentation-with-invalid-multiple-comment
-									"E117", -- over-indented
-									"Q000", -- bad-quotes-inline-string
-									"Q001", -- bad-quotes-multiline-string
-									"Q002", -- bad-quotes-docstring
-									"Q003", -- avoidable-escaped-quote
-									"C90", -- mccabe complexity
-									"PLR2004", -- magic-value-comparison
-									"PLR0915", -- too-many-statements
-									"S101", -- assert
-									"PLR0913", -- too-many-arguments
-									"COM812", -- missing-trailing-comma
-									"COM819", -- prohibited-trailing-comma
-									"ISC001", -- single-line-implicit-string-concatenation
-									"S608", -- f-string SQL injection
-									"S603", -- subprocess input validation
-									"RET508", -- no else/elif after return/break
+									-- async: trio/anyio-only rules
+									"ASYNC105",
+									"ASYNC115",
+									"ASYNC116",
+									"ASYNC212",
+									"ASYNC230",
+									"ASYNC240",
+									-- blanket exceptions
+									"BLE001",
+									-- complexity
+									"C90",
+									-- trailing commas (formatter handles)
+									"COM812",
+									"COM819",
+									-- copyright
+									"CPY001",
+									-- docstrings
+									"D",
+									"D1",
+									"D203",
+									"D212",
+									"D213",
+									"D401",
+									"DOC",
+									-- indentation (formatter handles)
+									"E111",
+									"E114",
+									"E117",
+									-- lambda assignment
+									"E731",
+									-- exception message style
+									"EM101",
+									"EM102",
+									"EM103",
+									-- boolean traps
+									"FBT001",
+									"FBT002",
+									"FBT003",
+									-- fixmes/todos
+									"FIX",
+									-- f-string in logging
+									"G004",
+									-- implicit string concat (formatter handles)
+									"ISC001",
+									-- private import
+									"PLC2701",
+									-- too-many-* and magic numbers
+									"PLR0",
+									"PLR2004",
+									-- return style
+									"RET504",
+									"RET505",
+									"RET508",
+									-- assert
+									"S101",
+									-- security: pickle, hashing, ciphers, xml, ssl, etc.
+									"S301",
+									"S303",
+									"S304",
+									"S305",
+									"S308",
+									"S313",
+									"S314",
+									"S315",
+									"S316",
+									"S317",
+									"S318",
+									"S319",
+									"S323",
+									"S324",
+									"S404",
+									"S501",
+									"S502",
+									"S506",
+									"S507",
+									"S601",
+									"S603",
+									"S608",
+									"S610",
+									"S611",
+									"S701",
+									"S702",
+									"S704",
+									-- suppressible-exception
+									"SIM105",
+									-- private member access
+									"SLF001",
+									-- todos
+									"TD",
+									-- raise-vanilla-args
+									"TRY003",
+									-- tab indentation
+									"W191",
 								},
 								fixable = { "ALL" },
-								unfixable = { "ERA001" },
-								-- Promote commonly-safe "unsafe" fixes to auto-apply
+								unfixable = {},
 								["extend-safe-fixes"] = {
-									"F401", -- unused imports
-									"TCH", -- TYPE_CHECKING block moves
-									"UP", -- pyupgrade modernization
-									"B006", -- mutable default args
-									"EM", -- exception messages
-									"RUF013", -- implicit Optional
-									"TID252", -- relative imports → absolute
+									"F401",
+									"TCH",
+									"UP",
+									"B006",
+									"EM",
+									"RUF013",
+									"TID252",
+									"PLR6201",
+									"RUF038",
+									"ERA001",
+									"ARG005",
+								},
+								["per-file-ignores"] = {
+									["tests/*"] = { "S101", "ARG", "ANN", "TID252" },
+									["__init__.py"] = { "F401" },
+								},
+								["flake8-tidy-imports"] = {
+									["ban-relative-imports"] = "all",
+								},
+								["flake8-comprehensions"] = {
+									["allow-dict-calls-with-keyword-arguments"] = true,
 								},
 							},
 						},
