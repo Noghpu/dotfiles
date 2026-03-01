@@ -48,3 +48,90 @@ map("n", "<leader>co", function()
     context = { only = { "source.organizeImports" }, diagnostics = {} },
   })
 end, { desc = "Organize Imports" })
+
+-- Ruff workspace diagnostics: pick a code → open matching files in trouble
+map("n", "<leader>xr", function()
+  local clients = vim.lsp.get_clients({ name = "ruff" })
+  if #clients == 0 then
+    Snacks.notify.warn("ruff LSP not attached")
+    return
+  end
+  local root = clients[1].root_dir
+
+  vim.system({ "ruff", "check", "--statistics" }, { text = true, cwd = root }, function(out)
+    vim.schedule(function()
+      if out.code ~= 0 and out.code ~= 1 then
+        Snacks.notify.error("ruff: " .. (out.stderr or "unknown error"))
+        return
+      end
+
+      local items = {}
+      for line in (out.stdout or ""):gmatch("[^\n]+") do
+        local count, code, name = line:match("^%s*(%d+)%s+(%S+)%s+(.+)")
+        if code then
+          items[#items + 1] = {
+            text = ("%s %s %d"):format(code, name, count),
+            code = code,
+            count = tonumber(count),
+            name = vim.trim(name),
+          }
+        end
+      end
+      table.sort(items, function(a, b)
+        return a.count > b.count
+      end)
+
+      if #items == 0 then
+        Snacks.notify.info("No ruff diagnostics")
+        return
+      end
+
+      Snacks.picker({
+        title = "Ruff Diagnostics",
+        items = items,
+        layout = { preset = "select" },
+        format = function(item)
+          return {
+            { ("%4d"):format(item.count), "Number" },
+            { "  " },
+            { ("%-12s"):format(item.code), "DiagnosticWarn" },
+            { item.name, "Comment" },
+          }
+        end,
+        confirm = function(picker, item)
+          picker:close()
+          local selected = picker:selected({ fallback = true })
+          local codes = vim.tbl_map(function(s)
+            return s.code
+          end, selected)
+          local ruff_select = table.concat(codes, ",")
+          vim.system(
+            { "ruff", "check", "--select", ruff_select, "--output-format", "json" },
+            { text = true, cwd = root },
+            function(r)
+              vim.schedule(function()
+                local ok, diags = pcall(vim.json.decode, r.stdout or "")
+                if not ok or #diags == 0 then
+                  Snacks.notify.info("No results for " .. item.code)
+                  return
+                end
+                local qf = {}
+                for _, d in ipairs(diags) do
+                  qf[#qf + 1] = {
+                    filename = d.filename,
+                    lnum = d.location.row,
+                    col = d.location.column,
+                    text = ("[%s] %s"):format(d.code, d.message),
+                    type = "W",
+                  }
+                end
+                vim.fn.setqflist({}, " ", { title = "ruff: " .. item.code, items = qf })
+                vim.cmd("Trouble qflist open")
+              end)
+            end
+          )
+        end,
+      })
+    end)
+  end)
+end, { desc = "Ruff diagnostics by code" })
