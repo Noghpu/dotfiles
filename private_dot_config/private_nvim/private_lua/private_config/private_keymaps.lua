@@ -161,3 +161,43 @@ vim.keymap.set("n", "<leader>cts", function()
   vim.o.operatorfunc = "v:lua._snake_rename"
   return "g@l"
 end, { expr = true, desc = "LSP rename to snake_case" })
+
+-- Pyrefly: insert inferred type annotations into current file
+map("n", "<leader>cii", function()
+  if vim.bo.filetype ~= "python" then
+    Snacks.notify.warn("pyrefly infer: not a Python buffer")
+    return
+  end
+  if vim.fn.executable("pyrefly") ~= 1 then
+    Snacks.notify.error("pyrefly not found on PATH")
+    return
+  end
+  local bufnr = vim.api.nvim_get_current_buf()
+  if vim.bo[bufnr].modified then
+    local ok = vim.fn.confirm("Buffer has unsaved changes. Save before running pyrefly infer?", "&Yes\n&No") == 1
+    if not ok then
+      return
+    end
+  end
+  vim.cmd("silent write")
+  local file = vim.fn.expand("%:p")
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  vim.system({ "pyrefly", "infer", file }, { text = true }, function(out)
+    vim.schedule(function()
+      if not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
+      if out.code ~= 0 then
+        local msg = vim.trim(out.stderr or out.stdout or "unknown error")
+        Snacks.notify.error("pyrefly infer: " .. msg)
+        return
+      end
+      -- Replace buffer contents to preserve undo tree
+      local lines = vim.fn.readfile(file)
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+      vim.bo[bufnr].modified = false
+      pcall(vim.api.nvim_win_set_cursor, 0, cursor)
+      Snacks.notify.info("pyrefly infer: annotations inserted")
+    end)
+  end)
+end, { desc = "Pyrefly infer types" })
