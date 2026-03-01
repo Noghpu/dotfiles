@@ -135,3 +135,29 @@ map("n", "<leader>xr", function()
     end)
   end)
 end, { desc = "Ruff diagnostics by code" })
+
+local function snake_rename()
+  local word = vim.fn.expand("<cword>")
+  local s = word:gsub("([%l%d])(%u)", "%1_%2")
+  while true do
+    local new = s:gsub("(%u)(%u%l)", "%1_%2")
+    if new == s then
+      break
+    end
+    s = new
+  end
+  s = s:lower():gsub("^_", "")
+  if s ~= word:lower() then
+    vim.lsp.buf.rename(s)
+  end
+end
+
+-- Must be globally accessible for operatorfunc
+_G._snake_rename = function(_)
+  snake_rename()
+end
+
+vim.keymap.set("n", "<leader>cts", function()
+  vim.o.operatorfunc = "v:lua._snake_rename"
+  return "g@l"
+end, { expr = true, desc = "LSP rename to snake_case" })
