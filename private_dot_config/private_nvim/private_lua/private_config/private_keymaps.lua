@@ -37,14 +37,14 @@ map("t", "<ESC><ESC>", "<C-\\><C-n>", { silent = true, desc = "Exit terminal mod
 
 -- Python
 map("n", "<leader>cp", function()
-	local file = vim.fn.expand("%:p")
-	Snacks.terminal("uv run -s " .. file, { key = "python_run" })
+  local file = vim.fn.expand("%:p")
+  Snacks.terminal("uv run -s " .. file, { key = "python_run" })
 end, { desc = "Run Python script" })
 
 -- LSP
 map("n", "<leader>co", function()
-	vim.lsp.buf.code_action({
-		apply = true,
-		context = { only = { "source.organizeImports" }, diagnostics = {} },
-	})
+  vim.lsp.buf.code_action({
+    apply = true,
+    context = { only = { "source.organizeImports" }, diagnostics = {} },
+  })
 end, { desc = "Organize Imports" })
