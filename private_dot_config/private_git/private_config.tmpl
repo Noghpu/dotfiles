@@ -25,6 +25,25 @@ pager = delta
 [merge]
     conflictstyle = zdiff3
 
+{{ if lookPath "ec" -}}
+# -- ec as your merge tool --
+[merge]
+    tool = ec
+[mergetool "ec"]
+    cmd = ec "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+    trustExitCode = true
+[mergetool]
+    keepBackup = false
+    prompt = false
+
+{{ end -}}
+{{ if lookPath "mergiraf" -}}
+# -- mergiraf as a merge driver --
+[merge "mergiraf"]
+    name = mergiraf
+    driver = mergiraf merge --git %O %A %B -s %S -x %X -y %Y -p %P -l %L
+
+{{ end -}}
 [pull]
     rebase = true
 
