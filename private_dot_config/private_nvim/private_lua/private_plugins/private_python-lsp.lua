@@ -1,19 +1,11 @@
 return {
-	-- Disable basedpyright (LazyVim's default when lazyvim_python_lsp is set)
+	-- Configure pyrefly, ty, and ruff LSPs
 	{
 		"neovim/nvim-lspconfig",
 		opts = {
 			servers = {
 				basedpyright = { enabled = false },
 				pyright = { enabled = false },
-			},
-		},
-	},
-	-- Configure pyrefly, ty, and ruff LSPs
-	{
-		"neovim/nvim-lspconfig",
-		opts = {
-			servers = {
 				-- pyrefly type checker
 				pyrefly = {
 					init_options = {
@@ -36,21 +28,35 @@ return {
 				ty = {
 					settings = {
 						ty = {
-							diagnosticMode = "workspace",
-							inlayHints = {
-								variableTypes = true,
-								callArgumentNames = true,
-							},
+							showSyntaxErrors = false,
 							configuration = {
 								rules = {
-									["possibly-unresolved-reference"] = "error",
-									["division-by-zero"] = "warn",
-									["deprecated"] = "error",
-									["ambiguous-protocol-member"] = "error",
-									["ineffective-final"] = "error",
+									all = "ignore",
 								},
 							},
+							inlayHints = {
+								variableTypes = false,
+								callArgumentNames = false,
+							},
 						},
+					},
+					handlers = {
+						["textDocument/hover"] = function() end,
+						["textDocument/completion"] = function() end,
+						["textDocument/signatureHelp"] = function() end,
+						["textDocument/rename"] = function() end,
+						["textDocument/prepareRename"] = function() end,
+						["textDocument/codeAction"] = function() end,
+						["textDocument/documentSymbol"] = function() end,
+						["textDocument/documentHighlight"] = function() end,
+						["textDocument/foldingRange"] = function() end,
+						["textDocument/selectionRange"] = function() end,
+						["textDocument/inlayHint"] = function() end,
+						["textDocument/diagnostic"] = function() end,
+						["textDocument/publishDiagnostics"] = function() end,
+						["textDocument/semanticTokens/full"] = function() end,
+						["textDocument/semanticTokens/full/delta"] = function() end,
+						["textDocument/semanticTokens/range"] = function() end,
 					},
 				},
 				-- ruff linter/formatter LSP — mirrors ruff.toml as fallback
@@ -190,12 +196,6 @@ return {
 						},
 					},
 				},
-			},
-			setup = {
-				ty = function(server, sopts)
-					vim.lsp.config(server, sopts)
-					return true -- skip auto-enable, use :LspStart ty
-				end,
 			},
 		},
 	},
