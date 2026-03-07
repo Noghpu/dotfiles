@@ -5,7 +5,7 @@ return {
     opts = {
       servers = {
         -- pyrefly type checker
-        basedpyright = { enabled = false },
+        basedpyright = { enabled = true },
         pyright = { enabled = false },
         pyrefly = {
           init_options = {
@@ -25,6 +25,7 @@ return {
           },
         },
         -- ty type checker (disabled, :LspStart ty to activate)
+        zuban = {},
         ty = {
           settings = {
             ty = {
@@ -207,6 +208,7 @@ return {
         "pyrefly",
         "ty",
         "ruff",
+        "zuban",
       },
     },
   },
