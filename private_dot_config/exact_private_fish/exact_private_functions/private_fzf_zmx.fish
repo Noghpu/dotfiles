@@ -55,6 +55,6 @@ function fzf_zmx --description "Pick or create a zmx session using fzf"
         return 0
     end
 
-    commandline --replace "zmx attach $session_name"
+    commandline --replace "zmx detach && zmx attach $session_name"
     commandline --function execute
 end
