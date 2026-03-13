@@ -20,12 +20,12 @@ function fzf_zmx --description "Pick or create a zmx session using fzf"
     set -l output (
         printf '%s\n' $display | fzf \
             --print-query \
-            --expect=ctrl-n \
+            --expect=ctrl-n,ctrl-k \
             --height=80% \
             --layout=reverse \
             --border=rounded \
             --prompt='zmx › ' \
-            --header='Enter: attach │ Ctrl-N: new session' \
+            --header='Enter: attach │ Ctrl-N: new │ Ctrl-K: kill' \
             --preview='zmx history {1}' \
             --preview-window='right:60%:follow'
     )
@@ -36,6 +36,13 @@ function fzf_zmx --description "Pick or create a zmx session using fzf"
     set -l selected $output[3]
 
     set -l session_name
+
+    if test "$key" = ctrl-k -a -n "$selected"
+        set session_name (string split --fields=1 ' ' -- $selected)
+        commandline --replace "zmx kill $session_name"
+        commandline --function execute
+        return
+    end
 
     if test "$key" = ctrl-n -a -n "$query"
         set session_name $query

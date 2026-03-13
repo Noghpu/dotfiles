@@ -1,6 +1,6 @@
 format = """
-$env_var\
 $os\
+$env_var\
 $username\
 $hostname\
 $directory\
@@ -72,10 +72,10 @@ default = ""
 format = "([$symbol]($style))"
 
 [env_var.ZMX_SESSION]
-symbol = " "
+symbol = "\uf489"
 style = "#cba6f7"  # mauve
 default = ""
-format = "([$symbol$env_value]($style))"
+format = "([$symbol($env_value)]($style))"
 
 {{ if ne .chezmoi.os "windows" -}}
 [git_branch]

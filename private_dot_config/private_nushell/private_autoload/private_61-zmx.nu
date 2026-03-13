@@ -25,16 +25,16 @@ $env.config.keybindings ++= [
                 | str join (char nl)
             ); let result = (
                 $sessions
-                | fzf --print-query --expect=ctrl-n --height=80% --layout=reverse --border=rounded --prompt='zmx › ' --header='Enter: attach │ Ctrl-N: new session' --preview='zmx history {1}' --preview-window='right:60%:follow'
+                | fzf --print-query --expect=ctrl-n,ctrl-k --height=80% --layout=reverse --border=rounded --prompt='zmx › ' --header='Enter: attach │ Ctrl-N: new │ Ctrl-K: kill' --preview='zmx history {1}' --preview-window='right:60%:follow'
                 | decode utf-8
                 | str trim
                 | lines
-            ); let query = ($result | get -i 0 | default ''); let key = ($result | get -i 1 | default ''); let selected = ($result | get -i 2 | default ''); let session = (
+            ); let query = ($result | get -i 0 | default ''); let key = ($result | get -i 1 | default ''); let selected = ($result | get -i 2 | default ''); if $key == 'ctrl-k' and ($selected | is-not-empty) { zmx kill ($selected | split row ' ' | get 0) } else { let session = (
                 if $key == 'ctrl-n' and ($query | is-not-empty) { $query }
                 else if ($selected | is-not-empty) { $selected | split row ' ' | get 0 }
                 else if ($query | is-not-empty) { $query }
                 else { '' }
-            ); if ($session | is-not-empty) { zmx attach $session }"
+            ); if ($session | is-not-empty) { zmx attach $session } }"
         }
     }
 ]
