@@ -71,6 +71,12 @@ style = "#f9e2af"  # yellow
 default = ""
 format = "([$symbol]($style))"
 
+[env_var.ZMX_SESSION]
+symbol = " "
+style = "#cba6f7"  # mauve
+default = ""
+format = "([$symbol$env_value]($style))"
+
 {{ if ne .chezmoi.os "windows" -}}
 [git_branch]
 style = "#fab387"  # peach
