@@ -1,5 +1,6 @@
 if type -q uv
     abbr --add uvim uv run nvim
+    abbr --add uvr uv run
     if not test -f ~/.config/fish/completions/uv.fish
         echo 'uv generate-shell-completion fish | source' >~/.config/fish/completions/uv.fish
     end
