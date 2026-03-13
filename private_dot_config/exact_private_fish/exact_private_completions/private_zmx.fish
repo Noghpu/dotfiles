@@ -1,0 +1,1 @@
+zmx completions fish | source
