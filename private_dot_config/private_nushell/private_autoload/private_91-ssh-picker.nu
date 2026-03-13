@@ -4,7 +4,7 @@ if (which fzf | is-empty) { return }
 
 # Extract SSH hosts from config and present via fzf
 def ssh-hosts []: nothing -> string {
-    let config_file = $"($env.HOMEPATH)/.ssh/config"
+    let config_file = ($nu.home-dir | path join ".ssh" "config")
 
     if not ($config_file | path exists) {
         print -e "No SSH config found"
