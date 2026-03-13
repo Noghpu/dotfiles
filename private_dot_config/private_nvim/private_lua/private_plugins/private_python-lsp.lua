@@ -1,13 +1,35 @@
+--- Strip all server capabilities except diagnostics.
+local function diagnostics_only(client)
+  local cap = client.server_capabilities
+  cap.hoverProvider = false
+  cap.completionProvider = nil
+  cap.signatureHelpProvider = nil
+  cap.definitionProvider = false
+  cap.declarationProvider = false
+  cap.typeDefinitionProvider = false
+  cap.implementationProvider = false
+  cap.referencesProvider = false
+  cap.documentHighlightProvider = false
+  cap.documentSymbolProvider = false
+  cap.workspaceSymbolProvider = false
+  cap.codeLensProvider = nil
+  cap.documentFormattingProvider = false
+  cap.documentRangeFormattingProvider = false
+  cap.renameProvider = false
+  cap.foldingRangeProvider = false
+  cap.selectionRangeProvider = false
+  cap.inlayHintProvider = nil
+  cap.semanticTokensProvider = nil
+end
+
 return {
-  -- Configure pyrefly, ty, and ruff LSPs
   {
     "neovim/nvim-lspconfig",
     opts = {
       servers = {
-        -- pyrefly type checker
-        basedpyright = { enabled = true },
-        pyright = { enabled = false },
+        -- pyrefly: primary LSP (hover, completion, go-to-def, inlay hints, diagnostics)
         pyrefly = {
+          root_markers = { "uv.lock", ".git" },
           init_options = {
             pyrefly = {
               displayTypeErrors = "force-on",
@@ -24,9 +46,22 @@ return {
             },
           },
         },
-        -- ty type checker (disabled, :LspStart ty to activate)
-        zuban = {},
+        pyright = { enabled = false },
+        -- basedpyright: diagnostics only
+        basedpyright = {
+          enabled = false,
+          root_markers = { "uv.lock", ".git" },
+          on_attach = diagnostics_only,
+        },
+        -- zuban: diagnostics only
+        zuban = {
+          root_markers = { "uv.lock", ".git" },
+          on_attach = diagnostics_only,
+        },
+        -- ty: diagnostics only
         ty = {
+          root_markers = { "uv.lock", ".git" },
+          on_attach = diagnostics_only,
           settings = {
             ty = {
               showSyntaxErrors = false,
@@ -41,30 +76,10 @@ return {
               },
             },
           },
-          handlers = {
-            ["textDocument/hover"] = function() end,
-            ["textDocument/completion"] = function() end,
-            ["textDocument/signatureHelp"] = function() end,
-            ["textDocument/rename"] = function() end,
-            ["textDocument/prepareRename"] = function() end,
-            ["textDocument/codeAction"] = function() end,
-            ["textDocument/documentSymbol"] = function() end,
-            ["textDocument/documentHighlight"] = function() end,
-            ["textDocument/foldingRange"] = function() end,
-            ["textDocument/selectionRange"] = function() end,
-            ["textDocument/inlayHint"] = function() end,
-            ["textDocument/diagnostic"] = function() end,
-            ["textDocument/publishDiagnostics"] = function() end,
-            ["textDocument/semanticTokens/full"] = function() end,
-            ["textDocument/semanticTokens/full/delta"] = function() end,
-            ["textDocument/semanticTokens/range"] = function() end,
-          },
         },
-        -- ruff linter/formatter LSP — mirrors ruff.toml as fallback
+        -- ruff: diagnostics only (formatting via conform)
         ruff = {
-          on_attach = function(client)
-            client.server_capabilities.hoverProvider = false
-          end,
+          root_markers = { "uv.lock", ".git" },
           init_options = {
             settings = {
               configurationPreference = "filesystemFirst",
@@ -200,7 +215,6 @@ return {
       },
     },
   },
-  -- Ensure mason installs the tools
   {
     "mason-org/mason.nvim",
     opts = {
