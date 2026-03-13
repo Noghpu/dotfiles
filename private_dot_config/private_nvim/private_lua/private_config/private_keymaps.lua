@@ -42,6 +42,7 @@ map("n", "<leader>cp", function()
 end, { desc = "Run Python script" })
 
 -- LSP
+map("n", "<M-d>", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
 map("n", "<leader>co", function()
   vim.lsp.buf.code_action({
     apply = true,
