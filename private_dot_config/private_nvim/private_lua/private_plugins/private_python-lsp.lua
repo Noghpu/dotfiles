@@ -55,11 +55,13 @@ return {
         },
         -- zuban: diagnostics only
         zuban = {
+          enabled = false,
           root_markers = { "uv.lock", ".git" },
           on_attach = diagnostics_only,
         },
         -- ty: diagnostics only
         ty = {
+          enabled = false,
           root_markers = { "uv.lock", ".git" },
           on_attach = diagnostics_only,
           settings = {
