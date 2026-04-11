@@ -89,3 +89,26 @@ do
     return orig_code_action(opts)
   end
 end
+
+-- Treesitter textobject swap keymaps (buffer-local, filetype-aware)
+vim.api.nvim_create_autocmd("FileType", {
+  group = vim.api.nvim_create_augroup("treesitter_swap", { clear = true }),
+  callback = function(ev)
+    if not LazyVim.treesitter.have(vim.bo[ev.buf].filetype, "textobjects") then
+      return
+    end
+
+    local s = require("nvim-treesitter-textobjects.swap")
+    local maps = {
+      { "<leader>tsa", "swap_next", "@parameter.inner", "Swap arg next" },
+      { "<leader>tsA", "swap_previous", "@parameter.inner", "Swap arg prev" },
+      { "<leader>tsf", "swap_next", "@function.outer", "Swap function next" },
+      { "<leader>tsF", "swap_previous", "@function.outer", "Swap function prev" },
+    }
+    for _, m in ipairs(maps) do
+      vim.keymap.set("n", m[1], function()
+        s[m[2]](m[3], "textobjects")
+      end, { buffer = ev.buf, desc = m[4], silent = true })
+    end
+  end,
+})
