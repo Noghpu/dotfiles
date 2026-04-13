@@ -10,10 +10,10 @@ function fzf_zmx --description "Pick or create a zmx session using fzf"
     end
 
     set -l display (zmx list 2>/dev/null | while read -l line
-        set -l name (string match -r 'session_name=(\S+)' $line)[2]
+        set -l name (string match -r 'name=(\S+)' $line)[2]
         set -l pid (string match -r 'pid=(\S+)' $line)[2]
         set -l clients (string match -r 'clients=(\S+)' $line)[2]
-        set -l dir (string match -r 'started_in=(\S+)' $line)[2]
+        set -l dir (string match -r 'start_dir=(\S+)' $line)[2]
         printf "%-20s pid:%-8s clients:%-2s %s\n" $name $pid $clients $dir
     end)
 
@@ -39,7 +39,7 @@ function fzf_zmx --description "Pick or create a zmx session using fzf"
 
     if test "$key" = ctrl-k -a -n "$selected"
         set session_name (string split --fields=1 ' ' -- $selected)
-        commandline --replace "zmx detach && zmx kill $session_name"
+        commandline --replace "zmx kill $session_name"
         commandline --function execute
         return
     end
@@ -55,6 +55,6 @@ function fzf_zmx --description "Pick or create a zmx session using fzf"
         return 0
     end
 
-    commandline --replace "zmx detach && zmx attach $session_name"
+    commandline --replace "zmx attach $session_name"
     commandline --function execute
 end
