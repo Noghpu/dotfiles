@@ -39,8 +39,7 @@ function fzf_zmx --description "Pick or create a zmx session using fzf"
 
     if test "$key" = ctrl-k -a -n "$selected"
         set session_name (string split --fields=1 ' ' -- $selected)
-        commandline --replace "zmx kill $session_name"
-        commandline --function execute
+        zmx kill $session_name
         return
     end
 
@@ -51,10 +50,9 @@ function fzf_zmx --description "Pick or create a zmx session using fzf"
     else if test -n "$query"
         set session_name $query
     else
-        commandline --function repaint
+        commandline --function repaint 2>/dev/null
         return 0
     end
 
-    commandline --replace "zmx attach $session_name"
-    commandline --function execute
+    zmx attach $session_name
 end
