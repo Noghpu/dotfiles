@@ -12,6 +12,8 @@ source ~/.config/nushell/autoload/50-codex.nu
 $env.config = ($env.config | merge {
     show_banner: false
     edit_mode: vi
+    use_kitty_protocol: true
+    auto_cd_implicit: true
     buffer_editor: "nvim"
     cursor_shape: {
         vi_insert: line
