@@ -11,6 +11,7 @@ export-env {
         EDITOR: ($env.EDITOR? | default "nvim")
         VISUAL: ($env.VISUAL? | default "nvim")
         MANROFFOPT: "-c"
+        UV_ENV_FILE: ".env"
     }
 
     let path_additions = [

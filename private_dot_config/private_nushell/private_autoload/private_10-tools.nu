@@ -1,19 +1,3 @@
-export def bat [...args: string] {
-    if (which bat | is-not-empty) {
-        ^bat ...$args
-    } else {
-        error make { msg: "bat: bat is required" }
-    }
-}
-
-export def fd [...args: string] {
-    if (which fd | is-not-empty) {
-        ^fd ...$args
-    } else {
-        error make { msg: "fd: fd is required" }
-    }
-}
-
 export def la [...patterns: glob] {
     if ($patterns | is-empty) {
         ls --all --long
@@ -56,22 +40,8 @@ export def "l." [] {
     ls --all | where name =~ '(^|[\\/])\.'
 }
 
-export def cm [...args: string] {
-    ^chezmoi ...$args
-}
-
-export def cmca [] {
-    ^chezmoi re-add .
-    ^chezmoi git add .
-    ^chezmoi git commit -- -a -m update
-}
-
 export def lg [...args: string] {
     ^lazygit ...$args
-}
-
-export def tug [] {
-    ^jj bookmark move --from "heads(::@- & bookmarks())" --to @-
 }
 
 export def uvim [...args: string] {
