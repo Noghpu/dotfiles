@@ -1,0 +1,10 @@
+# External content pulled in by chezmoi at apply time.
+# The passage secret store lives in its own git repo; chezmoi clones/pulls it
+# into ~/.passage/store so a single `chezmoi update` populates everything.
+# NOTE: ~/.passage/identities (the private key) is intentionally NOT here.
+[".passage/store"]
+    type = "git-repo"
+    url = "https://github.com/Noghpu/passage-store.git"
+    refreshPeriod = "168h"
+    [".passage/store".pull]
+        args = ["--ff-only"]
