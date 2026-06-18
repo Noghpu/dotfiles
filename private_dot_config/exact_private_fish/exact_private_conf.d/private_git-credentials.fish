@@ -47,7 +47,10 @@ exit 0'
     test -x $helper; or chmod +x $helper
 
     # Make passage the global git credential helper (idempotent; drops any prior helper).
+    # --unset-all clears only the top-level credential.helper; host-scoped keys like
+    # credential.'https://my-host.com'.helper live in a subsection and are left intact.
     if test (git config --global --get-all credential.helper 2>/dev/null | string collect) != passage
+        git config --global --unset-all credential.helper 2>/dev/null
         git config --global credential.helper passage
     end
 
