@@ -32,5 +32,5 @@ __pycache__/
 
 # Claude
 .claude/
-.codex
-
+.codex/
+.omp/
