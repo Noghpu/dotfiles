@@ -9,6 +9,9 @@ elseif vim.fn.executable("nu") == 1 then
   vim.o.shell = "nu"
 end
 
+-- Change root discovery
+vim.g.root_spec = { { "lsp", "pyproject.toml", "uv.lock" }, { ".git", "package.json", "Cargo.toml", "lua" }, "cwd" }
+
 -- OSC 52 clipboard for SSH yanking (async, no paste delay)
 local is_windows = vim.env.LC_CLIENT_OS == "windows"
 if is_windows then

@@ -29,7 +29,7 @@ return {
       servers = {
         -- pyrefly: primary LSP (hover, completion, go-to-def, inlay hints, diagnostics)
         pyrefly = {
-          root_markers = { "uv.lock", ".git" },
+          root_markers = { "pyproject.toml", "uv.lock", ".git" },
           init_options = {
             pyrefly = {
               displayTypeErrors = "force-on",
@@ -50,19 +50,19 @@ return {
         -- basedpyright: diagnostics only
         basedpyright = {
           enabled = false,
-          root_markers = { "uv.lock", ".git" },
+          root_markers = { "pyproject.toml", "uv.lock", ".git" },
           on_attach = diagnostics_only,
         },
         -- zuban: diagnostics only
         zuban = {
           enabled = false,
-          root_markers = { "uv.lock", ".git" },
+          root_markers = { "pyproject.toml", "uv.lock", ".git" },
           on_attach = diagnostics_only,
         },
         -- ty: diagnostics only
         ty = {
           enabled = false,
-          root_markers = { "uv.lock", ".git" },
+          root_markers = { "pyproject.toml", "uv.lock", ".git" },
           on_attach = diagnostics_only,
           settings = {
             ty = {
@@ -81,7 +81,7 @@ return {
         },
         -- ruff: diagnostics only (formatting via conform)
         ruff = {
-          root_markers = { "uv.lock", ".git" },
+          root_markers = { "pyproject.toml", "uv.lock", ".git" },
           init_options = {
             settings = {
               configurationPreference = "filesystemFirst",
