@@ -1,0 +1,26 @@
+#:schema https://yazi-rs.github.io/schemas/keymap.json
+
+# These bindings are prepended to Yazi's defaults rather than replacing them.
+
+[[mgr.prepend_keymap]]
+on   = "!"
+run  = 'shell "$SHELL" --block'
+desc = "Open a shell here"
+for  = "unix"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "r" ]
+run  = "cd /"
+desc = "Go to filesystem root"
+for  = "unix"
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "y" ]
+run  = "cd ~/.config/yazi"
+desc = "Go to Yazi config"
+for  = "unix"
+
+[[input.prepend_keymap]]
+on   = "<Esc>"
+run  = "close"
+desc = "Cancel input"
