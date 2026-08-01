@@ -50,6 +50,45 @@ output "eDP-1" {
     variable-refresh-rate on-demand=true
 }
 
+// Personal keybindings. This file is included after the DMS-generated binds,
+// so conflicting keys here intentionally override DMS defaults.
+binds {
+    // Security: free Super+L for rightward navigation.
+    Mod+Escape hotkey-overlay-title="Lock Screen" {
+        spawn "dms" "ipc" "call" "lock" "lock";
+    }
+
+    // Focus.
+    Mod+H { focus-column-left; }
+    Mod+J { focus-workspace-down; }
+    Mod+K { focus-workspace-up; }
+    Mod+L { focus-column-right; }
+
+    // Move.
+    Mod+Shift+H { move-column-left; }
+    Mod+Shift+J { move-column-to-workspace-down; }
+    Mod+Shift+K { move-column-to-workspace-up; }
+    Mod+Shift+L { move-column-right; }
+
+    // Focus monitors, with arrow aliases.
+    Mod+Ctrl+H     { focus-monitor-left; }
+    Mod+Ctrl+J     { focus-monitor-down; }
+    Mod+Ctrl+K     { focus-monitor-up; }
+    Mod+Ctrl+L     { focus-monitor-right; }
+    Mod+Ctrl+Left  { focus-monitor-left; }
+    Mod+Ctrl+Down  { focus-monitor-down; }
+    Mod+Ctrl+Up    { focus-monitor-up; }
+    Mod+Ctrl+Right { focus-monitor-right; }
+
+    // Correct the generated DMS binding, which currently targets workspace 4.
+    Mod+Shift+3 { move-column-to-workspace 3; }
+}
+
+// Disable the built-in recent-window shortcuts; Super+Tab opens the overview.
+recent-windows {
+    binds {}
+}
+
 // Trigger VRR for games launched through gamescope.
 window-rule {
     match app-id="^gamescope$"
