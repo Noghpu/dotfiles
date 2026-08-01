@@ -1,0 +1,57 @@
+// User overrides — included last to supersede dms defaults.
+// Safe to edit; dms does not manage this file.
+
+input {
+    keyboard {
+        xkb {
+            layout "us,ch"
+            options "caps:swapescape,grp:alt_shift_toggle"
+        }
+    }
+}
+
+layout {
+    center-focused-column "always"
+    default-column-width { proportion 0.75; }
+}
+
+animations {
+    window-open {
+        duration-ms 50
+        curve "ease-out-expo"
+    }
+    window-close {
+        duration-ms 50
+        curve "ease-out-quad"
+    }
+    screenshot-ui-open {
+        duration-ms 100
+        curve "ease-out-quad"
+    }
+}
+
+// Override gnome corner radius back to 4 (dms sets 12)
+window-rule {
+    match app-id=r#"^org\.gnome\."#
+    geometry-corner-radius 4
+    clip-to-geometry true
+}
+
+// Dim inactive windows
+window-rule {
+    match is-active=false
+    opacity 0.9
+}
+
+// On-demand VRR for the built-in panel: engages only when a window
+// with variable-refresh-rate is fullscreen (e.g. games via gamescope),
+// stays off on the desktop to avoid VRR brightness flicker.
+output "eDP-1" {
+    variable-refresh-rate on-demand=true
+}
+
+// Trigger VRR for games launched through gamescope.
+window-rule {
+    match app-id="^gamescope$"
+    variable-refresh-rate true
+}
