@@ -1,5 +1,9 @@
-// User overrides — included last to supersede dms defaults.
-// Safe to edit; dms does not manage this file.
+// Personal niri configuration — included last from config.kdl, so anything
+// here supersedes it. Hand-maintained: nothing generates this file.
+//
+// Shell keybinds target Noctalia v5 IPC (`noctalia msg <command>`). The set
+// below started as the DMS-generated defaults and was ported when CachyOS
+// moved from DankMaterialShell to Noctalia.
 
 input {
     keyboard {
@@ -30,7 +34,14 @@ animations {
     }
 }
 
-// Override gnome corner radius back to 4 (dms sets 12)
+// On-demand VRR for the built-in panel: engages only when a window
+// with variable-refresh-rate is fullscreen (e.g. games via gamescope),
+// stays off on the desktop to avoid VRR brightness flicker.
+output "eDP-1" {
+    variable-refresh-rate on-demand=true
+}
+
+// Override the gnome corner radius set in config.kdl back to 4
 window-rule {
     match app-id=r#"^org\.gnome\."#
     geometry-corner-radius 4
@@ -43,34 +54,110 @@ window-rule {
     opacity 0.9
 }
 
-// On-demand VRR for the built-in panel: engages only when a window
-// with variable-refresh-rate is fullscreen (e.g. games via gamescope),
-// stays off on the desktop to avoid VRR brightness flicker.
-output "eDP-1" {
-    variable-refresh-rate on-demand=true
+// Trigger VRR for games launched through gamescope.
+window-rule {
+    match app-id="^gamescope$"
+    variable-refresh-rate true
 }
 
-// Personal keybindings. This file is included after the DMS-generated binds,
-// so conflicting keys here intentionally override DMS defaults.
+// Disable the built-in recent-window shortcuts; Super+Tab opens the overview.
+recent-windows {
+    binds {}
+}
+
 binds {
-    // Security: free Super+L for rightward navigation.
-    Mod+Escape hotkey-overlay-title="Lock Screen" {
-        spawn "dms" "ipc" "call" "lock" "lock";
+    // === System & Overview ===
+    Mod+D repeat=false hotkey-overlay-title="Overview" { toggle-overview; }
+    Mod+Tab repeat=false { toggle-overview; }
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // === Application Launchers ===
+    Mod+Return hotkey-overlay-title="Open Terminal" { spawn "kitty"; }
+    Mod+Space hotkey-overlay-title="Application Launcher" {
+        spawn "noctalia" "msg" "panel-toggle" "launcher";
+    }
+    Mod+V hotkey-overlay-title="Clipboard History" {
+        spawn "noctalia" "msg" "panel-toggle" "clipboard";
+    }
+    Mod+Comma hotkey-overlay-title="Settings" {
+        spawn "noctalia" "msg" "settings-toggle";
+    }
+    Mod+Y hotkey-overlay-title="Browse Wallpapers" {
+        spawn "noctalia" "msg" "panel-toggle" "wallpaper";
+    }
+    Mod+N hotkey-overlay-title="Notification Center" {
+        spawn "noctalia" "msg" "panel-toggle" "control-center" "notifications";
+    }
+    // Noctalia has no process-list surface; DMS's task manager maps to btop.
+    Mod+M hotkey-overlay-title="Task Manager" { spawn "kitty" "-e" "btop"; }
+    Mod+B hotkey-overlay-title="Firefox" { spawn "firefox"; }
+
+    // === Security ===
+    // Super+L stays free for rightward navigation, and Super+Escape stays
+    // free for niri's shortcut-inhibit escape hatch.
+    Mod+X hotkey-overlay-title="Lock Screen" {
+        spawn "noctalia" "msg" "session" "lock";
+    }
+    Mod+Shift+E { quit; }
+    Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" { spawn "kitty" "-e" "btop"; }
+
+    // === Audio Controls ===
+    XF86AudioRaiseVolume allow-when-locked=true {
+        spawn "noctalia" "msg" "volume-up" "3";
+    }
+    XF86AudioLowerVolume allow-when-locked=true {
+        spawn "noctalia" "msg" "volume-down" "3";
+    }
+    XF86AudioMute allow-when-locked=true {
+        spawn "noctalia" "msg" "volume-mute";
+    }
+    XF86AudioMicMute allow-when-locked=true {
+        spawn "noctalia" "msg" "mic-mute";
     }
 
-    // Focus.
+    // === Brightness Controls ===
+    XF86MonBrightnessUp allow-when-locked=true {
+       spawn "noctalia" "msg" "brightness-up" "5";
+    }
+    XF86MonBrightnessDown allow-when-locked=true {
+       spawn "noctalia" "msg" "brightness-down" "5";
+    }
+
+    // === Window Management ===
+    Mod+Q repeat=false { close-window; }
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+T { toggle-window-floating; }
+    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+    Mod+W { toggle-column-tabbed-display; }
+
+    // === Focus Navigation ===
     Mod+H { focus-column-left; }
     Mod+J { focus-workspace-down; }
     Mod+K { focus-workspace-up; }
     Mod+L { focus-column-right; }
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-workspace-down; }
+    Mod+Up    { focus-workspace-up; }
+    Mod+Right { focus-column-right; }
 
-    // Move.
+    // === Window Movement ===
     Mod+Shift+H { move-column-left; }
     Mod+Shift+J { move-column-to-workspace-down; }
     Mod+Shift+K { move-column-to-workspace-up; }
     Mod+Shift+L { move-column-right; }
+    Mod+Shift+Left  { move-column-left; }
+    Mod+Shift+Down  { move-column-to-workspace-down; }
+    Mod+Shift+Up    { move-column-to-workspace-up; }
+    Mod+Shift+Right { move-column-right; }
 
-    // Focus monitors, with arrow aliases.
+    // === Column Navigation ===
+    Mod+Home { focus-column-first; }
+    Mod+End  { focus-column-last; }
+    Mod+Ctrl+Home { move-column-to-first; }
+    Mod+Ctrl+End  { move-column-to-last; }
+
+    // === Monitor Navigation ===
     Mod+Ctrl+H     { focus-monitor-left; }
     Mod+Ctrl+J     { focus-monitor-down; }
     Mod+Ctrl+K     { focus-monitor-up; }
@@ -80,17 +167,87 @@ binds {
     Mod+Ctrl+Up    { focus-monitor-up; }
     Mod+Ctrl+Right { focus-monitor-right; }
 
-    // Correct the generated DMS binding, which currently targets workspace 4.
+    // === Move to Monitor ===
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
+
+    // === Move Workspaces ===
+    Mod+Shift+N         { move-workspace-down; }
+    Mod+Shift+P         { move-workspace-up; }
+    Mod+Shift+U         { move-workspace-down; }
+    Mod+Shift+I         { move-workspace-up; }
+
+    // === Mouse Wheel Navigation ===
+    Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+
+    Mod+WheelScrollRight      { focus-column-right; }
+    Mod+WheelScrollLeft       { focus-column-left; }
+    Mod+Ctrl+WheelScrollRight { move-column-right; }
+    Mod+Ctrl+WheelScrollLeft  { move-column-left; }
+
+    Mod+Shift+WheelScrollDown      { focus-column-right; }
+    Mod+Shift+WheelScrollUp        { focus-column-left; }
+    Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
+    Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
+
+    // === Numbered Workspaces ===
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+
+    // === Move to Numbered Workspaces ===
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
     Mod+Shift+3 { move-column-to-workspace 3; }
-}
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
 
-// Disable the built-in recent-window shortcuts; Super+Tab opens the overview.
-recent-windows {
-    binds {}
-}
+    // === Column Management ===
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+    Mod+Period { expel-window-from-column; }
 
-// Trigger VRR for games launched through gamescope.
-window-rule {
-    match app-id="^gamescope$"
-    variable-refresh-rate true
+    // === Sizing & Layout ===
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-window-height; }
+    Mod+Ctrl+R { reset-window-height; }
+    Mod+Ctrl+F { expand-column-to-available-width; }
+    Mod+C { center-column; }
+    Mod+Ctrl+C { center-visible-columns; }
+
+    // === Manual Sizing ===
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+
+    // === Screenshots ===
+    XF86Launch1 { screenshot; }
+    Ctrl+XF86Launch1 { screenshot-screen; }
+    Alt+XF86Launch1 { screenshot-window; }
+    Print { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+
+    // === System Controls ===
+    Mod+Ctrl+P { power-off-monitors; }
 }
