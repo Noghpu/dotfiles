@@ -34,9 +34,6 @@ ripgrep/
 {{- if not (lookPath "starship") }}
 starship/
 {{- end }}
-{{- if not (lookPath "tmux") }}
-tmux/
-{{- end }}
 {{- if not (lookPath "yazi") }}
 yazi/
 {{- end }}
