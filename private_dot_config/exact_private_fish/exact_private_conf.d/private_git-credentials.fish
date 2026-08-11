@@ -40,16 +40,30 @@ login="$(printf "%s\n" "$secret" | sed -n "s/^login: //p" | head -n1)"
 [ -n "$login" ]    && printf "username=%s\n" "$login"
 exit 0'
 
-    if not test -f $helper; or test (cat $helper | string collect) != "$body"
+    # --allow-empty: without it an empty/unreadable $helper yields zero arguments
+    # and `test` aborts with "Missing argument at index 3".
+    if not test -f $helper; or test (cat $helper | string collect --allow-empty) != "$body"
         printf '%s\n' $body >$helper
         chmod +x $helper
     end
     test -x $helper; or chmod +x $helper
 
-    # Make passage the global git credential helper (idempotent; drops any prior helper).
-    # --unset-all clears only the top-level credential.helper; host-scoped keys like
-    # credential.'https://my-host.com'.helper live in a subsection and are left intact.
-    if test (git config --global --get-all credential.helper 2>/dev/null | string collect) != passage
+    # Make passage the git credential helper (idempotent; drops any prior helper).
+    # The primary declaration lives in the chezmoi-managed ~/.config/git/config;
+    # this is the fallback for shells started before the next `chezmoi apply`.
+    #
+    # Deliberately NOT `--global` when reading: once ~/.gitconfig exists (chezmoi
+    # creates it), `git config --global --get-all` reads only that file and would
+    # miss the declaration in ~/.config/git/config — so we would append a second
+    # credential.helper and git would invoke passage twice per request. Plain
+    # --get-all reports the effective list across both files.
+    #
+    # `contains` keeps this convergent: if passage is already in the list from
+    # either file, do nothing at all.
+    if not contains passage (git config --get-all credential.helper 2>/dev/null)
+        # --unset-all clears only the top-level credential.helper; host-scoped keys
+        # like credential.'https://my-host.com'.helper live in a subsection and are
+        # left intact.
         git config --global --unset-all credential.helper 2>/dev/null
         git config --global credential.helper passage
     end

@@ -18,7 +18,15 @@
     dark = true
     side-by-side = true
     line-numbers = true
-    features = catppuccin-mocha
+
+{{ end -}}
+{{ if lookPath "passage" -}}
+# ~/.gitconfig does not exist, so `git config --global` writes into THIS file.
+# Declaring the helper here keeps fish's conf.d/git-credentials.fish (which sets
+# the same value) from leaving the chezmoi-managed file permanently modified.
+# The helper binary itself is generated into ~/.local/bin by that fish snippet.
+[credential]
+    helper = passage
 
 {{ end -}}
 [merge]
