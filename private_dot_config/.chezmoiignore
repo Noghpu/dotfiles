@@ -22,6 +22,13 @@ lazygit/
 {{- if not (lookPath "niri") }}
 niri/
 {{- end }}
+# niri ships CachyOS defaults: config.kdl is just a list of includes and cfg/
+# holds the modules it pulls in. Only user.kdl is ours, so keep the defaults
+# unmanaged — tracking config.kdl without cfg/ would apply a config whose
+# includes do not exist on a fresh machine.
+niri/config.kdl
+niri/cfg/
+niri/config.kdl.bak.*
 {{- if not (lookPath "nu") }}
 nushell/
 {{- end }}
