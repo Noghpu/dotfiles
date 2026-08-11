@@ -1,8 +1,8 @@
 if command -q eza
     set -gx EZA_CONFIG_DIR $XDG_CONFIG_HOME/eza
-    if not test -r
-        mkdir -p $XDG_CONFIG_HOME/eza
-        touch $XDG_CONFIG_HOME/eza/theme.yml
+    if not test -r $EZA_CONFIG_DIR/theme.yml
+        mkdir -p $EZA_CONFIG_DIR
+        touch $EZA_CONFIG_DIR/theme.yml
     end
 
     alias la='eza -lao --no-permissions --color=always --group-directories-first --icons=always' # all files and dirs`

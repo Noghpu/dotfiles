@@ -1,6 +1,7 @@
 fish_add_path ~/.local/bin ~/.cargo/bin ~/Applications/depot_tools
 
-enable_transience
+# Defined by starship's init; guard it so shells without starship start cleanly.
+type -q enable_transience; and enable_transience
 
 umask 077
 

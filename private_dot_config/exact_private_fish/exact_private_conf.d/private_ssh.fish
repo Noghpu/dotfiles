@@ -27,13 +27,8 @@ if status is-interactive
         # Load default key once, if present.
         if test -f ~/.ssh/id_ed25519
             ssh-add ~/.ssh/id_ed25519 2>/dev/null
+        else
+            echo "[ssh-agent] No ~/.ssh/id_ed25519 found — generate one with ssh-keygen -t ed25519"
         end
     end
-end
-
-# Add default key if it exists
-if test -f ~/.ssh/id_ed25519
-    ssh-add ~/.ssh/id_ed25519 2>/dev/null
-else
-    echo "[ssh-agent] No ~/.ssh/id_ed25519 found — generate one with ssh-keygen -t ed25519"
 end

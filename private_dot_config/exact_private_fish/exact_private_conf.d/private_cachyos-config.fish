@@ -69,7 +69,7 @@ abbr -a fgrep fgrep --color=auto
 abbr -a egrep egrep --color=auto
 abbr -a hw hwinfo --short # Hardware Info
 abbr -a big "expac -H M '%m\t%n' | sort -h | nl" # Sort installed packages according to size in MB
-abbr -a gitpkg "pacman -Q | grep -i "\-git" | wc -l" # List amount of -git packages
+abbr -a gitpkg "pacman -Q | grep -ic -- -git" # List amount of -git packages
 abbr -a update "sudo cachyos-rate-mirrors && sudo pacman -Syu"
 
 # Get fastest mirrors

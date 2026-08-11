@@ -49,9 +49,9 @@ export-env {
         $env.RIPGREP_CONFIG_PATH = ($env.XDG_CONFIG_HOME | path join "ripgrep" ".ripgreprc")
     }
 
-    if (which lazygit | is-not-empty) {
-        $env.CONFIG_DIR = ($env.XDG_CONFIG_HOME | path join "lazygit")
-    }
+    # No CONFIG_DIR export for lazygit: it already resolves
+    # $XDG_CONFIG_HOME/lazygit itself, and CONFIG_DIR is a generic name that
+    # leaks into every child process.
 
     if (which zoxide | is-not-empty) {
         zoxide init nushell | save -f ($env.XDG_CACHE_HOME | path join "zoxide.nu")
