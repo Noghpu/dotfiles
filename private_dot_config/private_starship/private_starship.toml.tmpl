@@ -14,9 +14,39 @@ $cmd_duration\
 $line_break\
 $character"""
 
+palette = "catppuccin_mocha"
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0dc"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+subtext1 = "#bac2de"
+subtext0 = "#a6adc8"
+overlay2 = "#9399b2"
+overlay1 = "#7f849c"
+overlay0 = "#6c7086"
+surface2 = "#585b70"
+surface1 = "#45475a"
+surface0 = "#313244"
+base = "#1e1e2e"
+mantle = "#181825"
+crust = "#11111b"
+
 [os]
 disabled = false
-style = "#b4befe"  # lavender
+style = "lavender"
 
 [os.symbols]
 Windows = "\uE62A"
@@ -42,17 +72,17 @@ RedHatEnterprise = "\U000F111B"
 
 [username]
 show_always = true
-style_user = "#f5c2e7"  # pink
-style_root = "#f38ba8"  # red
+style_user = "pink"
+style_root = "red"
 format = "[ $user]($style)"
 
 [hostname]
 ssh_only = true
-style = "#cba6f7"  # mauve
+style = "mauve"
 format = "@[$hostname]($style) "
 
 [directory]
-style = "#a6e3a1"  # green
+style = "green"
 format = " [$path]($style)"
 truncation_length = 3
 truncate_to_repo = true
@@ -67,24 +97,24 @@ truncation_symbol = "…/"
 
 [env_var.TMUX]
 symbol = "\uF489 "
-style = "#f9e2af"  # yellow
+style = "yellow"
 default = ""
 format = "([$symbol]($style))"
 
 [env_var.ZMX_SESSION]
 symbol = "\uf489 "
-style = "#cba6f7"  # mauve
+style = "mauve"
 default = ""
 format = '([$symbol(\($env_value\) )]($style))'
 
 {{ if ne .chezmoi.os "windows" -}}
 [git_branch]
-style = "#fab387"  # peach
+style = "peach"
 format = " [$symbol$branch]($style)"
 symbol = ""
 
 [git_status]
-style = "#f9e2af"  # yellow
+style = "yellow"
 format = "[$all_status$ahead_behind]($style)"
 ahead = "⇡${count}"
 behind = "⇣${count}"
@@ -104,12 +134,12 @@ symbol = " "
 
 [time]
 disabled = false
-style = "#89dceb"  # sky
+style = "sky"
 format = "[ \uF017 $time]($style)"
 time_format = "%R"
 
 [cmd_duration]
-style = "#94e2d5"  # teal
+style = "teal"
 format = " [$duration]($style)"
 min_time = 1000
 
@@ -117,5 +147,5 @@ min_time = 1000
 disabled = false
 
 [character]
-success_symbol = "[❯](bold #a6e3a1)"  # green
-error_symbol = "[❯](bold #f38ba8)"    # red
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"

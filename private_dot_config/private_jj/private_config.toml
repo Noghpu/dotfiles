@@ -3,3 +3,49 @@
 [user]
 name = "Noghpu"
 email = "noghpu@gmail.com"
+
+# Catppuccin Mocha semantic colors. More specific built-in styles (bold,
+# underline, and graph-node styling) continue to inherit from these labels.
+[colors]
+"error heading" = { fg = "#f38ba8", bold = true }
+"warning heading" = { fg = "#f9e2af", bold = true }
+"hint heading" = { fg = "#89dceb", bold = true }
+commit_id = "#89b4fa"
+change_id = "#cba6f7"
+rest = "#6c7086"
+author = "#f9e2af"
+committer = "#f9e2af"
+timestamp = "#94e2d5"
+working_copies = "#a6e3a1"
+workspace_name = "#a6e3a1"
+bookmark = "#f5c2e7"
+bookmarks = "#f5c2e7"
+local_bookmarks = "#f5c2e7"
+remote_bookmarks = "#f5c2e7"
+tag = "#f5c2e7"
+tags = "#f5c2e7"
+git_ref = "#a6e3a1"
+divergent = "#cba6f7"
+conflict = "#f38ba8"
+empty = "#a6e3a1"
+placeholder = "#f38ba8"
+separator = "#6c7086"
+elided = "#6c7086"
+root = "#a6e3a1"
+"diff header" = "#f9e2af"
+"diff empty" = "#89dceb"
+"diff binary" = "#89dceb"
+"diff hunk_header" = "#89dceb"
+"diff removed" = { fg = "#f38ba8" }
+"diff added" = { fg = "#a6e3a1" }
+"diff removed token" = { bg = "#45273a", underline = false }
+"diff added token" = { bg = "#28433c", underline = false }
+"diff modified" = "#89dceb"
+"diff untracked" = "#cba6f7"
+"diff renamed" = "#89dceb"
+"diff copied" = "#a6e3a1"
+"node elided" = { fg = "#6c7086" }
+"node working_copy" = { fg = "#a6e3a1", bold = true }
+"node current_operation" = { fg = "#a6e3a1", bold = true }
+"node immutable" = { fg = "#89dceb", bold = true }
+"node conflicted" = { fg = "#f38ba8", bold = true }

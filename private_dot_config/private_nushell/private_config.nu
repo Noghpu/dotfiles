@@ -81,4 +81,8 @@ if (which zoxide | is-not-empty) {
 
 source ~/.config/nushell/local.nu
 
+# Apply the official Catppuccin theme last so local/default color settings do
+# not switch Nushell away from Mocha.
+source ~/.config/nushell/themes/catppuccin_mocha.nu
+
 use-native-prompt
