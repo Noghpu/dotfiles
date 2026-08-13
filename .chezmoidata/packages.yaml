@@ -1,0 +1,61 @@
+packages:
+  arch:
+    # Personal roles layered on top of a CachyOS Niri installation.
+    # The distribution remains responsible for the system and desktop baseline.
+    enabledRoles:
+      - base
+      - desktop
+      - gaming
+
+    roles:
+      base:
+        repo:
+          - age
+          - bat
+          - btop
+          - chezmoi
+          - eza
+          - fd
+          - fish
+          - fzf
+          - git-delta
+          - github-cli
+          - just
+          - jujutsu
+          - lazygit
+          - mergiraf
+          - neovim
+          - podman
+          - ripgrep
+          - starship
+          - uv
+          - yay
+          - yazi
+          - zoxide
+        aur:
+          - carapace-bin
+          - passage-git
+        binaries: []
+
+      desktop:
+        repo:
+          - kitty
+          - ttf-jetbrains-mono-nerd
+          - zen-browser-bin
+        aur: []
+        binaries: []
+
+      gaming:
+        repo:
+          - cachyos-gaming-meta
+          - cachyos-gaming-applications
+        aur: []
+        binaries: []
+
+      # Enable per machine when provisioning a remote/server environment.
+      server:
+        repo: []
+        aur: []
+        binaries:
+          - script: zmx.sh
+            version: 0.7.0

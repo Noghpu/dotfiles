@@ -1,0 +1,38 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# This manifest intentionally describes only the personal layer. CachyOS and
+# its Niri profile own the underlying system, hardware, and desktop packages.
+if ! command -v pacman >/dev/null 2>&1; then
+    exit 0
+fi
+
+repo_packages=(
+{{- range $roleName := .packages.arch.enabledRoles }}
+{{- $role := index $.packages.arch.roles $roleName }}
+{{- range $role.repo }}
+    {{ . | quote }}
+{{- end }}
+{{- end }}
+)
+
+sudo pacman -S --needed --noconfirm "${repo_packages[@]}"
+
+aur_packages=(
+{{- range $roleName := .packages.arch.enabledRoles }}
+{{- $role := index $.packages.arch.roles $roleName }}
+{{- range $role.aur }}
+    {{ . | quote }}
+{{- end }}
+{{- end }}
+)
+
+if ((${#aur_packages[@]})); then
+    if ! command -v yay >/dev/null 2>&1; then
+        echo "yay was not installed; cannot install AUR packages" >&2
+        exit 1
+    fi
+    yay -S --needed --noconfirm "${aur_packages[@]}"
+fi
+{{- end }}

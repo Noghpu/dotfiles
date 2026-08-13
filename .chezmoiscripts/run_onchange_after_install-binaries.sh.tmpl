@@ -1,0 +1,13 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+installer_dir={{ joinPath .chezmoi.homeDir ".local/share/binary-install-scripts" | quote }}
+
+{{- range $roleName := .packages.arch.enabledRoles }}
+{{- $role := index $.packages.arch.roles $roleName }}
+{{- range $binary := $role.binaries }}
+"$installer_dir/{{ $binary.script }}" --version {{ $binary.version | quote }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -5,6 +5,13 @@
 [".passage/store"]
     type = "git-repo"
     url = "https://github.com/Noghpu/passage-store.git"
-    refreshPeriod = "168h"
     [".passage/store".pull]
+        args = ["--ff-only"]
+
+# Shared installers for upstream prebuilt binaries. Versions remain pinned in
+# .chezmoidata/packages.yaml; this checkout only supplies the installer code.
+[".local/share/binary-install-scripts"]
+    type = "git-repo"
+    url = "https://github.com/Noghpu/binary-install-scripts.git"
+    [".local/share/binary-install-scripts".pull]
         args = ["--ff-only"]
