@@ -17,7 +17,10 @@ repo_packages=(
 {{- end }}
 )
 
-sudo pacman -S --needed --noconfirm "${repo_packages[@]}"
+# Arch/CachyOS mirrors retain only current package versions. Refreshing the
+# databases without upgrading would create an unsupported partial-upgrade
+# state, so install the manifest as part of one full system upgrade.
+sudo pacman -Syu --needed --noconfirm "${repo_packages[@]}"
 
 aur_packages=(
 {{- range $roleName := .packages.arch.enabledRoles }}
