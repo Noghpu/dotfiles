@@ -1,12 +1,25 @@
 git:
   autoFetch: true
-  pagers:
 {{- if lookPath "delta" }}
-    - colorArg: always
-      pager: delta --paging=never --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+  diffRenderers:
+    - type: stdinFilter
+      name: Delta
+      colorArg: always
+      command: delta --paging=never --line-numbers --hyperlinks --hyperlinks-file-link-format="lazygit-edit://{path}:{line}"
+    - type: rawGit
+      name: Raw
 {{- end }}
 gui:
   sidePanelWidth: 0.2
+
+  # Use fuzzy matching when filtering lists with `/`.
+  filterMode: fuzzy
+
+  # Show the number of added/deleted lines alongside files.
+  showNumstatInFilesView: true
+
+  # Show how far each branch has diverged from its base branch.
+  showDivergenceFromBaseBranch: arrowAndNumber
 
   # If true, increase the height of the focused side window; creating an accordion effect.
   expandFocusedSidePanel: true
