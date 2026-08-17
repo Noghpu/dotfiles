@@ -1,0 +1,19 @@
+os_window_title $__SESSION_LAUNCHER_NAME
+
+new_tab Shell
+cd $__SESSION_LAUNCHER_ROOT
+launch
+
+new_tab Neovim
+cd $__SESSION_LAUNCHER_ROOT
+launch nvim
+
+new_tab Claude
+cd $__SESSION_LAUNCHER_ROOT
+launch claude
+
+new_tab Codex
+cd $__SESSION_LAUNCHER_ROOT
+launch codex
+
+focus_tab 0

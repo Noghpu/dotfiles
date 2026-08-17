@@ -1,0 +1,71 @@
+#!/usr/bin/env -S fish --no-config
+
+if not command -q python3; or not command -q noctalia; or not command -q kitty
+    echo "session-launcher: python3, noctalia, and kitty are required" >&2
+    exit 1
+end
+
+set -l __SESSION_LAUNCHER_CONFIG_HOME "$HOME/.config"
+if set -q XDG_CONFIG_HOME
+    set __SESSION_LAUNCHER_CONFIG_HOME "$XDG_CONFIG_HOME"
+end
+
+set -l __SESSION_LAUNCHER_SESSION_FILE \
+    "$__SESSION_LAUNCHER_CONFIG_HOME/kitty/session-launcher.kitty-session"
+set -l __SESSION_LAUNCHER_INCLUDE_FILE \
+    "$__SESSION_LAUNCHER_CONFIG_HOME/kitty/session-launcher.include"
+set -l __SESSION_LAUNCHER_GENERATOR \
+    (path dirname (status filename))/session-launcher-directories
+
+if not test -r "$__SESSION_LAUNCHER_SESSION_FILE"
+    echo "session-launcher: cannot read $__SESSION_LAUNCHER_SESSION_FILE" >&2
+    exit 1
+end
+
+if not test -r "$__SESSION_LAUNCHER_INCLUDE_FILE"
+    echo "session-launcher: cannot read $__SESSION_LAUNCHER_INCLUDE_FILE" >&2
+    exit 1
+end
+
+if not test -x "$__SESSION_LAUNCHER_GENERATOR"
+    echo "session-launcher: cannot execute $__SESSION_LAUNCHER_GENERATOR" >&2
+    exit 1
+end
+
+set -l __SESSION_LAUNCHER_SELECTED_DIRECTORY (
+    "$__SESSION_LAUNCHER_GENERATOR" "$__SESSION_LAUNCHER_INCLUDE_FILE" \
+        | noctalia dmenu --prompt 'Project directory'
+)
+set -l __SESSION_LAUNCHER_PIPE_STATUS $pipestatus
+
+if test $__SESSION_LAUNCHER_PIPE_STATUS[1] -ne 0
+    exit $__SESSION_LAUNCHER_PIPE_STATUS[1]
+end
+
+# Noctalia exits 1 when the picker is dismissed or Escape is pressed.
+if test $__SESSION_LAUNCHER_PIPE_STATUS[2] -eq 1
+    exit 0
+else if test $__SESSION_LAUNCHER_PIPE_STATUS[2] -ne 0
+    echo "session-launcher: Noctalia picker failed" >&2
+    exit $__SESSION_LAUNCHER_PIPE_STATUS[2]
+end
+
+if not set -q __SESSION_LAUNCHER_SELECTED_DIRECTORY[1]
+    exit 0
+end
+
+set __SESSION_LAUNCHER_SELECTED_DIRECTORY \
+    (path resolve -Z "$__SESSION_LAUNCHER_SELECTED_DIRECTORY" | string split0)
+
+if not test -d "$__SESSION_LAUNCHER_SELECTED_DIRECTORY"
+    echo "session-launcher: not a directory: $__SESSION_LAUNCHER_SELECTED_DIRECTORY" >&2
+    exit 1
+end
+
+set -lx __SESSION_LAUNCHER_ROOT "$__SESSION_LAUNCHER_SELECTED_DIRECTORY"
+set -lx __SESSION_LAUNCHER_NAME \
+    (path basename -Z "$__SESSION_LAUNCHER_ROOT" | string split0)
+
+kitty \
+    --detach \
+    --session "$__SESSION_LAUNCHER_SESSION_FILE"

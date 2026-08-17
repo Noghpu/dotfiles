@@ -1,0 +1,4 @@
+# One absolute or ~/ path per line. Each root and all descendants are shown.
+~/Projects
+~/.config
+~/.local/share/chezmoi

@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+from collections import deque
+
+
+def __SESSION_LAUNCHER_ROOTS(include_file: str):
+    seen = set()
+
+    try:
+        lines = open(include_file, encoding="utf-8")
+    except OSError as error:
+        print(f"session-launcher: cannot read {include_file}: {error}", file=sys.stderr)
+        raise SystemExit(1) from error
+
+    with lines:
+        for line_number, raw_line in enumerate(lines, 1):
+            configured_root = raw_line.strip()
+            if not configured_root or configured_root.startswith("#"):
+                continue
+
+            if configured_root == "~" or configured_root.startswith("~/"):
+                expanded_root = os.path.expanduser(configured_root)
+            elif os.path.isabs(configured_root):
+                expanded_root = configured_root
+            else:
+                print(
+                    f"session-launcher: {include_file}:{line_number}: "
+                    f"root must start with / or ~/: {configured_root}",
+                    file=sys.stderr,
+                )
+                continue
+
+            resolved_root = os.path.realpath(expanded_root)
+            if not os.path.isdir(resolved_root):
+                print(
+                    f"session-launcher: {include_file}:{line_number}: "
+                    f"not a directory: {configured_root}",
+                    file=sys.stderr,
+                )
+                continue
+
+            if resolved_root not in seen:
+                seen.add(resolved_root)
+                yield resolved_root
+
+
+def __SESSION_LAUNCHER_DIRECTORY_BATCHES(include_file: str):
+    emitted = set()
+    frontier = deque()
+    roots = []
+
+    for root_index, root in enumerate(__SESSION_LAUNCHER_ROOTS(include_file)):
+        if root in emitted:
+            continue
+        emitted.add(root)
+        frontier.append((root_index, root))
+        roots.append(root)
+
+    if not frontier:
+        print("session-launcher: none of the included roots exist", file=sys.stderr)
+        raise SystemExit(1)
+
+    yield roots
+
+    while frontier:
+        next_frontier = []
+
+        for root_index, directory in frontier:
+            try:
+                with os.scandir(directory) as entries:
+                    for entry in entries:
+                        if entry.name == ".git":
+                            continue
+                        try:
+                            if entry.is_dir(follow_symlinks=False):
+                                next_frontier.append((root_index, entry.path))
+                        except OSError:
+                            continue
+            except OSError:
+                continue
+
+        next_frontier.sort(key=lambda item: (item[0], os.fsencode(item[1])))
+        frontier.clear()
+        directories = []
+
+        for root_index, directory in next_frontier:
+            if directory in emitted:
+                continue
+            emitted.add(directory)
+            frontier.append((root_index, directory))
+            directories.append(directory)
+
+        if directories:
+            yield directories
+
+
+def __SESSION_LAUNCHER_DIRECTORIES(include_file: str):
+    for directories in __SESSION_LAUNCHER_DIRECTORY_BATCHES(include_file):
+        yield from directories
+
+
+def __SESSION_LAUNCHER_MAIN():
+    if len(sys.argv) != 2:
+        print("usage: session-launcher-directories INCLUDE_FILE", file=sys.stderr)
+        raise SystemExit(2)
+
+    output = sys.stdout.buffer
+    try:
+        for directories in __SESSION_LAUNCHER_DIRECTORY_BATCHES(sys.argv[1]):
+            encoded_directories = []
+            for directory in directories:
+                encoded_directory = os.fsencode(directory)
+                if b"\n" in encoded_directory:
+                    print(
+                        f"session-launcher: skipping directory containing a newline: "
+                        f"{directory!r}",
+                        file=sys.stderr,
+                    )
+                    continue
+                encoded_directories.append(encoded_directory)
+
+            if not encoded_directories:
+                continue
+
+            output.write(b"\n".join(encoded_directories) + b"\n")
+            output.flush()
+    except BrokenPipeError:
+        # Noctalia may close the input when the picker is dismissed.
+        os.dup2(os.open(os.devnull, os.O_WRONLY), output.fileno())
+
+
+if __name__ == "__main__":
+    __SESSION_LAUNCHER_MAIN()
