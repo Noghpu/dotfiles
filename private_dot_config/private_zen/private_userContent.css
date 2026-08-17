@@ -1,0 +1,13 @@
+/* Catppuccin background for Zen's otherwise-empty internal new-tab pages. */
+@-moz-document url("about:newtab"), url("about:home"), url("about:blank") {
+  :root {
+    --newtab-background-color: #313244 !important;
+    --newtab-background-color-secondary: #313244 !important;
+    background: #313244 !important;
+  }
+
+  html,
+  body {
+    background: #313244 !important;
+  }
+}

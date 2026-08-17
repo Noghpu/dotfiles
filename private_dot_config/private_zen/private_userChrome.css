@@ -1,0 +1,57 @@
+/* Small Catppuccin fixes for UI surfaces not covered by Edit Theme. */
+@-moz-document url-prefix("chrome:") {
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --newtab-background-color: #1e1e2e !important;
+      --newtab-background-color-secondary: #313244 !important;
+    }
+
+    /* Match the idle sidebar search field to the Essentials buttons. */
+    #urlbar:not([breakout-extend]) > .urlbar-background {
+      background: #313244 !important;
+    }
+
+    /* Keep the sidebar placeholder consistent while the URL bar is floating. */
+    #urlbar-container:has(#urlbar[open][zen-floating-urlbar="true"]) {
+      background: #313244 !important;
+    }
+
+    /* Use Mocha Base behind an empty/new tab, without replacing Space themes. */
+    :root:has(#urlbar[pageproxystate="invalid"]) #zen-browser-background,
+    :root:has(#urlbar[pageproxystate="invalid"])
+      #zen-browser-background::before,
+    :root:has(#urlbar[pageproxystate="invalid"])
+      #zen-browser-background::after {
+      background: #1e1e2e !important;
+      opacity: 1 !important;
+    }
+
+    /* Essentials and the vertical New Tab button use Mocha surfaces. */
+    .tabbrowser-tab[zen-essential="true"] > .tab-stack > .tab-background,
+    #tabs-newtab-button:not([in-urlbar="true"]) {
+      background: #313244 !important;
+    }
+
+    .tabbrowser-tab[zen-essential="true"]:hover > .tab-stack > .tab-background,
+    .tabbrowser-tab[zen-essential="true"][visuallyselected]
+      > .tab-stack
+      > .tab-background::before,
+    #tabs-newtab-button:not([in-urlbar="true"]):hover {
+      background: #45475a !important;
+    }
+
+    .tabbrowser-tab[zen-essential="true"][visuallyselected]
+      > .tab-stack
+      > .tab-background::after {
+      display: none !important;
+    }
+
+    /* The centered search field shown for a new/empty tab. */
+    #urlbar[breakout-extend] > .urlbar-background,
+    #urlbar[zen-floating-urlbar="true"] > .urlbar-background {
+      --zen-urlbar-background-base: #181825 !important;
+      --zen-urlbar-background-transparent: #181825 !important;
+      background: #181825 !important;
+    }
+  }
+}

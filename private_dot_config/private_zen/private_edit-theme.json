@@ -1,0 +1,34 @@
+{
+  "type": "gradient",
+  "gradientColors": [
+    {
+      "c": "#313244",
+      "isCustom": true,
+      "algorithm": "floating",
+      "isPrimary": true,
+      "lightness": 36,
+      "position": null,
+      "type": null
+    },
+    {
+      "c": "#1e1e2e",
+      "isCustom": true,
+      "algorithm": "floating",
+      "isPrimary": false,
+      "lightness": 36,
+      "position": null,
+      "type": null
+    },
+    {
+      "c": "#181825",
+      "isCustom": true,
+      "algorithm": "floating",
+      "isPrimary": false,
+      "lightness": 36,
+      "position": null,
+      "type": null
+    }
+  ],
+  "opacity": 0.9,
+  "texture": 0
+}

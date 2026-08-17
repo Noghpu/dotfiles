@@ -1,0 +1,145 @@
+#!/bin/sh
+
+set -eu
+
+zen_config_root="${XDG_CONFIG_HOME:-$HOME/.config}/zen"
+profiles_file="$zen_config_root/profiles.ini"
+
+if [ ! -f "$profiles_file" ] || ! command -v jq >/dev/null 2>&1; then
+    exit 0
+fi
+
+profile_relative=$(awk -F= '
+    /^\[Install/ { in_install = 1; next }
+    /^\[/ { in_install = 0 }
+    in_install && $1 == "Default" { print substr($0, index($0, "=") + 1); exit }
+' "$profiles_file")
+
+if [ -z "$profile_relative" ]; then
+    profile_relative=$(awk -F= '
+        /^\[Profile/ { profile_path = ""; is_default = 0; next }
+        /^\[/ {
+            if (is_default && profile_path != "") { print profile_path; exit }
+        }
+        $1 == "Path" { profile_path = substr($0, index($0, "=") + 1) }
+        $1 == "Default" && $2 == "1" { is_default = 1 }
+        END { if (is_default && profile_path != "") print profile_path }
+    ' "$profiles_file" | head -n 1)
+fi
+
+if [ -z "$profile_relative" ]; then
+    exit 0
+fi
+
+profile_dir="$zen_config_root/$profile_relative"
+shortcuts="$profile_dir/zen-keyboard-shortcuts.json"
+backup="$profile_dir/zen-keyboard-shortcuts.pre-chezmoi.json"
+
+if [ ! -f "$shortcuts" ]; then
+    exit 0
+fi
+
+if [ ! -f "$backup" ]; then
+    install -m 600 "$shortcuts" "$backup"
+fi
+
+shortcuts_tmp=$(mktemp "$profile_dir/.zen-keyboard-shortcuts.json.XXXXXX")
+jq '
+  def modifiers($alt): {
+    control: false,
+    alt: $alt,
+    shift: true,
+    meta: false,
+    accel: true
+  };
+
+  def bind_key($id; $key; $alt):
+    map(if .id == $id then
+      .key = $key |
+      .keycode = "" |
+      .modifiers = modifiers($alt) |
+      .disabled = false
+    else . end);
+
+  def bind_keycode($id; $keycode; $alt):
+    map(if .id == $id then
+      .key = "" |
+      .keycode = $keycode |
+      .modifiers = modifiers($alt) |
+      .disabled = false
+    else . end);
+
+  def disable_matching($pattern):
+    map(if ((.id // "") | test($pattern)) then
+      .key = "" |
+      .keycode = "" |
+      .modifiers = {
+        control: false,
+        alt: false,
+        shift: false,
+        meta: false,
+        accel: false
+      } |
+      .disabled = true
+    else . end);
+
+  def custom($id; $key; $keycode; $action): {
+    id: $id,
+    key: $key,
+    keycode: $keycode,
+    group: "windowAndTabManagement",
+    l10nId: null,
+    modifiers: modifiers(false),
+    action: $action,
+    disabled: false,
+    reserved: false,
+    internal: false
+  };
+
+  .shortcuts |= (
+    # Remove our generated aliases before recreating them, making this script
+    # idempotent across repeated chezmoi applies.
+    map(select(((.id // "") | startswith("chezmoi-")) | not)) |
+
+    # Primary Ctrl+Shift application vocabulary.
+    bind_key("key_newNavigatorTab"; "t"; false) |
+    bind_key("key_close"; "w"; false) |
+    bind_key("key_showAllTabs"; "p"; false) |
+    bind_key("key_restoreLastClosedTabOrWindowOrSession"; "u"; false) |
+    bind_key("zen-toggle-pin-tab"; "d"; false) |
+    bind_key("zen-copy-url"; "c"; false) |
+    bind_key("key_toggleMute"; "m"; false) |
+    bind_key("zen-compact-mode-toggle"; "f"; false) |
+    bind_key("zen-toggle-sidebar"; "b"; false) |
+    bind_key("key_reload_skip_cache"; "r"; false) |
+    bind_key("key_screenshot"; "s"; false) |
+
+    # Alternatives for every action displaced by the primary bindings.
+    bind_key("key_closeWindow"; "q"; false) |
+    bind_key("key_dom"; "w"; true) |
+    bind_key("showAllHistoryKb"; "h"; true) |
+    bind_key("key_inspector"; "l"; true) |
+    bind_key("key_privatebrowsing"; "p"; true) |
+    bind_key("key_responsiveDesignMode"; "m"; true) |
+    bind_key("viewBookmarksToolbarKb"; "b"; true) |
+    bind_key("key_jsdebugger"; "z"; true) |
+    bind_key("key_webconsole"; "k"; true) |
+
+    # Splits and workspaces are deliberately out of the keyboard vocabulary.
+    disable_matching("^(zen-split-view-|zen-new-empty-split-view$)") |
+    disable_matching("^zen-workspace-") |
+
+    # Zen does not expose these aliases in its settings UI, but its shortcut
+    # loader accepts command-backed entries in the same native JSON format.
+    . + [
+      custom("chezmoi-open-settings"; ","; ""; "menu_preferences"),
+      custom("chezmoi-history-back-h"; "h"; ""; "Browser:Back"),
+      custom("chezmoi-history-forward-l"; "l"; ""; "Browser:Forward"),
+      custom("chezmoi-previous-tab-left"; ""; "VK_LEFT"; "Browser:PrevTab"),
+      custom("chezmoi-next-tab-right"; ""; "VK_RIGHT"; "Browser:NextTab")
+    ]
+  )
+' "$shortcuts" > "$shortcuts_tmp"
+
+chmod 600 "$shortcuts_tmp"
+mv "$shortcuts_tmp" "$shortcuts"

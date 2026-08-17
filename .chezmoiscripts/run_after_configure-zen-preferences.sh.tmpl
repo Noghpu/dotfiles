@@ -1,0 +1,55 @@
+#!/bin/sh
+
+set -eu
+
+zen_config_root="${XDG_CONFIG_HOME:-$HOME/.config}/zen"
+profiles_file="$zen_config_root/profiles.ini"
+
+if [ ! -f "$profiles_file" ]; then
+    exit 0
+fi
+
+profile_relative=$(awk -F= '
+    /^\[Install/ { in_install = 1; next }
+    /^\[/ { in_install = 0 }
+    in_install && $1 == "Default" { print substr($0, index($0, "=") + 1); exit }
+' "$profiles_file")
+
+if [ -z "$profile_relative" ]; then
+    profile_relative=$(awk -F= '
+        /^\[Profile/ { profile_path = ""; is_default = 0; next }
+        /^\[/ {
+            if (is_default && profile_path != "") { print profile_path; exit }
+        }
+        $1 == "Path" { profile_path = substr($0, index($0, "=") + 1) }
+        $1 == "Default" && $2 == "1" { is_default = 1 }
+        END { if (is_default && profile_path != "") print profile_path }
+    ' "$profiles_file" | head -n 1)
+fi
+
+if [ -z "$profile_relative" ]; then
+    exit 0
+fi
+
+profile_dir="$zen_config_root/$profile_relative"
+user_js="$profile_dir/user.js"
+user_chrome_source="{{ .chezmoi.sourceDir }}/private_dot_config/private_zen/private_userChrome.css"
+user_chrome="$profile_dir/chrome/userChrome.css"
+user_content_source="{{ .chezmoi.sourceDir }}/private_dot_config/private_zen/private_userContent.css"
+user_content="$profile_dir/chrome/userContent.css"
+
+{
+    printf '%s\n' '// Preferences managed by chezmoi.'
+    printf '%s\n' '// Enable the small, targeted UI overrides in chrome/userChrome.css.'
+    printf '%s\n' 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);'
+    printf '%s\n' '// Expose the explicit colors managed for every Space.'
+    printf '%s\n' 'user_pref("zen.theme.gradient.show-custom-colors", true);'
+    printf '%s\n' '// Disable touchpad swipe-to-navigate gestures.'
+    printf '%s\n' 'user_pref("widget.disable-swipe-tracker", true);'
+} > "$user_js"
+
+chmod 600 "$user_js"
+
+mkdir -p "$profile_dir/chrome"
+install -m 600 "$user_chrome_source" "$user_chrome"
+install -m 600 "$user_content_source" "$user_content"
