@@ -20,9 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-if not status is-interactive
-    exit
-end
+status is-interactive; or return
 
 set -g __done_version 1.19.1
 

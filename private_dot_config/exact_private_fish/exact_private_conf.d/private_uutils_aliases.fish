@@ -1,6 +1,8 @@
 # Lives in conf.d, not functions/: fish autoloads functions/<name>.fish only when
 # a function of that name is called, so these aliases never took effect there.
 
+status is-interactive; or return
+
 if not type -q uu-cp
     return
 end

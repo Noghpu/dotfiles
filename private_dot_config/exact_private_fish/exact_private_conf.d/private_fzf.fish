@@ -5,6 +5,8 @@ if type -q fzf
         '--color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8' \
         '--color=selected-bg:#45475a,border:#6c7086,label:#cdd6f4'
 
+    status is-interactive; or return
+
     if not test -r $__fish_cache_dir/fzf_init.fish
         fzf --fish >$__fish_cache_dir/fzf_init.fish
     end

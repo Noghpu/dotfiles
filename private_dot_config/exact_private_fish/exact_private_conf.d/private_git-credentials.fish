@@ -2,6 +2,8 @@
 # Preference order:  passage (age-backed) > git-credential-manager > nothing.
 # Replaces the former passage.fish and git-credential-manager.fish.
 
+status is-interactive; or return
+
 if type -q passage
     # === passage: the default credential manager when installed ==============
     # Set up everything required: helper on PATH + passage as the global helper.

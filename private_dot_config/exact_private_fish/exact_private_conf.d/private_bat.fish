@@ -1,7 +1,7 @@
 # bat configuration with Catppuccin theming
 # Rebuild the theme cache manually with `bat cache --build` after adding themes.
 
-if type -q batcat
+if status is-interactive; and type -q batcat
     alias bat='batcat'
 end
 
