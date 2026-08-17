@@ -9,22 +9,25 @@ input {
     keyboard {
         xkb {
             layout "us,ch"
-            options "caps:swapescape,grp:alt_shift_toggle"
+            options "caps:swapescape"
         }
     }
 }
 
 layout {
+    gaps 8
     center-focused-column "always"
-    default-column-width { proportion 0.75; }
+    default-column-width { proportion 0.95; }
 
     focus-ring {
+        width 2
         active-color "#cba6f7"
         inactive-color "#6c7086"
         urgent-color "#f38ba8"
     }
 
     border {
+        width 2
         active-color "#b4befe"
         inactive-color "#45475a"
         urgent-color "#f38ba8"
@@ -53,17 +56,23 @@ output "eDP-1" {
     variable-refresh-rate on-demand=true
 }
 
-// Override the gnome corner radius set in config.kdl back to 4
+// Tone down the theme's 20 px window rounding.
+window-rule {
+    geometry-corner-radius 8
+    clip-to-geometry true
+}
+
+// Keep GNOME windows a little squarer than the global rule.
 window-rule {
     match app-id=r#"^org\.gnome\."#
-    geometry-corner-radius 4
+    geometry-corner-radius 8
     clip-to-geometry true
 }
 
 // Dim inactive windows
 window-rule {
     match is-active=false
-    opacity 0.9
+    opacity 0.7
 }
 
 // Trigger VRR for games launched through gamescope.
@@ -79,39 +88,65 @@ recent-windows {
 
 binds {
     // === System & Overview ===
-    Mod+D repeat=false hotkey-overlay-title="Overview" { toggle-overview; }
     Mod+Tab repeat=false { toggle-overview; }
-    Mod+Shift+Slash { show-hotkey-overlay; }
+    Mod+Shift+Slash repeat=false {
+        spawn "noctalia" "msg" "panel-toggle" "noghpu/niri-shortcuts:shortcuts";
+    }
+
+    // === Intentionally Unused ===
+    // Persistent no-op overrides for personal and CachyOS bindings.
+    Mod+Ctrl+Return repeat=false { spawn; }
+    Mod+Shift+Return repeat=false { spawn; }
+    Mod+Alt+L repeat=false { spawn; }
+    Mod+Shift+N repeat=false { spawn; }
+    Mod+Ctrl+Shift+R repeat=false { spawn; }
+    Mod+Ctrl+1 repeat=false { spawn; }
+    Mod+Ctrl+2 repeat=false { spawn; }
+    Mod+Ctrl+3 repeat=false { spawn; }
+    Mod+Ctrl+4 repeat=false { spawn; }
+    Mod+Ctrl+5 repeat=false { spawn; }
+    Mod+Ctrl+6 repeat=false { spawn; }
+    Mod+Ctrl+7 repeat=false { spawn; }
+    Mod+Ctrl+8 repeat=false { spawn; }
+    Mod+Ctrl+9 repeat=false { spawn; }
+    Ctrl+Shift+1 repeat=false { spawn; }
+    Ctrl+Shift+2 repeat=false { spawn; }
+    Ctrl+Shift+3 repeat=false { spawn; }
 
     // === Application Launchers ===
-    Mod+Return hotkey-overlay-title="Open Terminal" { spawn "kitty"; }
-    Mod+Space hotkey-overlay-title="Application Launcher" {
+    Mod+Return { spawn "kitty"; }
+    Mod+P repeat=false {
+        spawn "session-launcher";
+    }
+    Mod+Space {
         spawn "noctalia" "msg" "panel-toggle" "launcher";
     }
-    Mod+V hotkey-overlay-title="Clipboard History" {
+    Mod+V {
         spawn "noctalia" "msg" "panel-toggle" "clipboard";
     }
-    Mod+Comma hotkey-overlay-title="Settings" {
+    Mod+Comma {
         spawn "noctalia" "msg" "settings-toggle";
     }
-    Mod+Y hotkey-overlay-title="Browse Wallpapers" {
+    Mod+Y {
         spawn "noctalia" "msg" "panel-toggle" "wallpaper";
     }
-    Mod+N hotkey-overlay-title="Notification Center" {
+    Mod+N {
         spawn "noctalia" "msg" "panel-toggle" "control-center" "notifications";
     }
     // Noctalia has no process-list surface; DMS's task manager maps to btop.
-    Mod+M hotkey-overlay-title="Task Manager" { spawn "kitty" "-e" "btop"; }
-    Mod+B hotkey-overlay-title="Firefox" { spawn "firefox"; }
+    Mod+M { spawn "kitty" "-e" "btop"; }
+    Mod+B {
+        spawn "sh" "-c" "if command -v zen-browser >/dev/null 2>&1; then exec zen-browser; else exec firefox; fi";
+    }
 
     // === Security ===
     // Super+L stays free for rightward navigation, and Super+Escape stays
     // free for niri's shortcut-inhibit escape hatch.
-    Mod+X hotkey-overlay-title="Lock Screen" {
+    Mod+X {
         spawn "noctalia" "msg" "session" "lock";
     }
     Mod+Shift+E { quit; }
-    Ctrl+Alt+Delete hotkey-overlay-title="Task Manager" { spawn "kitty" "-e" "btop"; }
+    Ctrl+Alt+Delete repeat=false hotkey-overlay-title="Session Menu" { spawn; }
 
     // === Audio Controls ===
     XF86AudioRaiseVolume allow-when-locked=true {
@@ -140,8 +175,9 @@ binds {
     Mod+F { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
     Mod+T { toggle-window-floating; }
-    Mod+Shift+V { switch-focus-between-floating-and-tiling; }
-    Mod+W { toggle-column-tabbed-display; }
+    Mod+Shift+T { switch-focus-between-floating-and-tiling; }
+    Mod+Shift+V repeat=false { spawn; }
+    Mod+W repeat=false { spawn; }
 
     // === Focus Navigation ===
     Mod+H { focus-column-left; }
@@ -166,8 +202,10 @@ binds {
     // === Column Navigation ===
     Mod+Home { focus-column-first; }
     Mod+End  { focus-column-last; }
-    Mod+Ctrl+Home { move-column-to-first; }
-    Mod+Ctrl+End  { move-column-to-last; }
+    Mod+Shift+Home { move-column-to-first; }
+    Mod+Shift+End  { move-column-to-last; }
+    Mod+Ctrl+Home repeat=false { spawn; }
+    Mod+Ctrl+End repeat=false { spawn; }
 
     // === Monitor Navigation ===
     Mod+Ctrl+H     { focus-monitor-left; }
@@ -190,26 +228,26 @@ binds {
     Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
 
     // === Move Workspaces ===
-    Mod+Shift+N         { move-workspace-down; }
-    Mod+Shift+P         { move-workspace-up; }
+    // Override CachyOS's power-off-monitors binding while leaving the key unused.
+    Mod+Shift+P repeat=false hotkey-overlay-title=null { spawn; }
     Mod+Shift+U         { move-workspace-down; }
     Mod+Shift+I         { move-workspace-up; }
 
     // === Mouse Wheel Navigation ===
-    Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
-    Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
-    Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
-    Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+    Mod+WheelScrollDown repeat=false { spawn; }
+    Mod+WheelScrollUp repeat=false { spawn; }
+    Mod+Ctrl+WheelScrollDown repeat=false { spawn; }
+    Mod+Ctrl+WheelScrollUp repeat=false { spawn; }
 
-    Mod+WheelScrollRight      { focus-column-right; }
-    Mod+WheelScrollLeft       { focus-column-left; }
-    Mod+Ctrl+WheelScrollRight { move-column-right; }
-    Mod+Ctrl+WheelScrollLeft  { move-column-left; }
+    Mod+WheelScrollRight repeat=false { spawn; }
+    Mod+WheelScrollLeft repeat=false { spawn; }
+    Mod+Ctrl+WheelScrollRight repeat=false { spawn; }
+    Mod+Ctrl+WheelScrollLeft repeat=false { spawn; }
 
-    Mod+Shift+WheelScrollDown      { focus-column-right; }
-    Mod+Shift+WheelScrollUp        { focus-column-left; }
-    Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
-    Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
+    Mod+Shift+WheelScrollDown repeat=false { spawn; }
+    Mod+Shift+WheelScrollUp repeat=false { spawn; }
+    Mod+Ctrl+Shift+WheelScrollDown repeat=false { spawn; }
+    Mod+Ctrl+Shift+WheelScrollUp repeat=false { spawn; }
 
     // === Numbered Workspaces ===
     Mod+1 { focus-workspace 1; }
@@ -240,11 +278,13 @@ binds {
 
     // === Sizing & Layout ===
     Mod+R { switch-preset-column-width; }
-    Mod+Shift+R { switch-preset-window-height; }
-    Mod+Ctrl+R { reset-window-height; }
+    Mod+Shift+R { reset-window-height; }
+    Mod+Ctrl+R repeat=false { spawn; }
     Mod+Ctrl+F { expand-column-to-available-width; }
-    Mod+C { center-column; }
-    Mod+Ctrl+C { center-visible-columns; }
+    Mod+C {
+        spawn "noctalia" "msg" "panel-toggle" "control-center";
+    }
+    Mod+Ctrl+C repeat=false { spawn; }
 
     // === Manual Sizing ===
     Mod+Minus { set-column-width "-10%"; }
@@ -253,13 +293,15 @@ binds {
     Mod+Shift+Equal { set-window-height "+10%"; }
 
     // === Screenshots ===
-    XF86Launch1 { screenshot; }
-    Ctrl+XF86Launch1 { screenshot-screen; }
-    Alt+XF86Launch1 { screenshot-window; }
-    Print { screenshot; }
+    Mod+S { screenshot-window; }
+    Print { screenshot-window; }
+    Mod+Shift+S { screenshot; }
+    Shift+Print { screenshot; }
+    Mod+Ctrl+S { screenshot-screen; }
     Ctrl+Print { screenshot-screen; }
-    Alt+Print { screenshot-window; }
 
     // === System Controls ===
     Mod+Ctrl+P { power-off-monitors; }
 }
+
+include "arknights.kdl"

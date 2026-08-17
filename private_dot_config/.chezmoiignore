@@ -29,6 +29,8 @@ niri/
 niri/config.kdl
 niri/cfg/
 niri/config.kdl.bak.*
+# Repository-only agent instructions; do not deploy them as niri config.
+niri/AGENTS.md
 {{- if not (lookPath "nu") }}
 nushell/
 {{- end }}

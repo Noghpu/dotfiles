@@ -34,6 +34,7 @@ packages:
           - zoxide
         aur:
           - carapace-bin
+          - kanata
           - passage-git
         binaries: []
 

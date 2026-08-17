@@ -1,10 +1,97 @@
 [shell]
 font_family = "JetBrainsMono Nerd Font"
 
+[shell.launcher]
+compact = true
+
 [theme]
 community_palette = "Catppuccin Mocha Mauve-Lavender"
 mode = "dark"
 source = "community"
 
+[wallpaper]
+directory = "{{ .chezmoi.homeDir }}/.config/wallpapers"
+
 [wallpaper.default]
 path = "{{ .chezmoi.homeDir }}/.config/wallpapers/catppuccin_logo.png"
+
+[bar.main]
+thickness = 28
+margin_ends = 36
+margin_opposite_edge = 6
+widget_spacing = 10
+capsule = false
+
+start = ["workspaces"]
+center = ["clock"]
+end = ["group:status"]
+
+[[bar.main.capsule_group]]
+id = "status"
+members = [
+  "media",
+  "tray",
+  "privacy",
+  "notifications",
+  "keyboard_layout",
+  "network",
+  "volume",
+  "battery",
+]
+fill = "surface_variant"
+padding = 10
+opacity = 1.0
+
+[widget.workspaces]
+style = "regular"
+show_labels = false
+hide_when_empty = false
+scale = 1.5
+pill_scale = 0.47
+active_pill_size = 2.0
+inactive_pill_size = 0.8
+empty_color = "on_surface_variant"
+capsule = true
+capsule_fill = "surface_variant"
+capsule_padding = 7
+capsule_opacity = 1.0
+
+[widget.clock]
+format = "{:%H:%M}"
+tooltip_format = "{:%A, %d %B %Y}"
+font_weight = 700
+capsule = true
+capsule_fill = "surface_variant"
+capsule_padding = 10
+capsule_opacity = 1.0
+
+[widget.media]
+album_art_only = true
+hide_when_no_media = true
+
+[widget.tray]
+drawer = true
+drawer_columns = 3
+drawer_item_size = 20
+
+[widget.privacy]
+hide_inactive = true
+
+[widget.notifications]
+hide_when_no_unread = true
+
+[widget.keyboard_layout]
+hide_when_single_layout = false
+show_glyph = true
+show_label = true
+display = "short"
+
+[widget.network]
+show_label = false
+
+[widget.volume]
+show_label = false
+
+[widget.battery]
+display_mode = "glyph"
+show_label = true

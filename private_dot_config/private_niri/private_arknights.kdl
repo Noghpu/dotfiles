@@ -1,0 +1,39 @@
+// Arknights (Yostar PC client under Proton, via ~/.local/bin/arknights).
+// GAMEID=umu-arknights makes Wine label both the Electron launcher and the Unity
+// game "steam_app_arknights", so one rule covers the whole session. Both are
+// fixed-size windows, which niri floats by default, so tiling is asked for
+// explicitly here.
+//
+// The "arknights" row is deliberately not declared in this file: a declared
+// workspace is permanent and sorts ahead of the numbered ones, which would shift
+// every Mod+1..9 bind by one. The launcher script names the trailing empty row
+// instead, just before starting the client. That name is left in place afterwards
+// and reused by the next launch; `niri msg action unset-workspace-name arknights`
+// turns it back into an ordinary row.
+//
+// Keyed on app-id with only the empty title excluded, rather than matching a
+// title of "Arknights": open- rules are evaluated at map time, and a title is not
+// reliably set that early. Excluding the empty title asks nothing of the game or
+// the launcher — the tray icon below is the only one that stays untitled.
+window-rule {
+    match app-id=r#"^steam_app_arknights$"#
+    exclude title=r#"^$"#
+    open-on-workspace "arknights"
+    open-floating false
+    open-fullscreen true
+}
+
+// The Yostar launcher registers a Windows tray icon. With no XEmbed tray on the
+// xwayland-satellite display to dock into, Wine's explorer.exe draws it as a
+// standalone 20x20 toplevel with an empty title — a second window next to the
+// launcher, gone once the launcher exits. It cannot be suppressed from the Wine
+// side here (ShowSystray=N in the prefix is ignored by this build), so keep it
+// out of the tiling and out of the focus path rather than letting it take a
+// column beside the game.
+window-rule {
+    match app-id=r#"^steam_app_arknights$"# title=r#"^$"#
+    open-on-workspace "arknights"
+    open-floating true
+    open-focused false
+    default-floating-position x=8 y=8 relative-to="bottom-right"
+}

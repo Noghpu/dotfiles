@@ -1,0 +1,147 @@
+;; Kanata 1.12+
+;; Framework Laptop US-ANSI QWERTY with mirrored home-row modifiers:
+;;   A S D F = left  Meta Alt Ctrl Shift
+;;   J K L ; = right Shift Ctrl Alt  Meta
+;;
+;; Home-row modifiers are intended for shortcuts. Dedicated Shift remains
+;; available for typing capital letters.
+
+(defcfg
+  process-unmapped-keys yes
+  concurrent-tap-hold yes
+
+  ;; Immediately type an HRM's letter when it follows another key within
+  ;; this window. This keeps normal typing responsive and tap-biased.
+  tap-hold-require-prior-idle 150
+)
+
+;; Physical handedness. The hardware Fn key is handled by the keyboard firmware
+;; and does not emit a normal keycode, so it is not part of this map. Dedicated
+;; modifiers, Space, Tab, Enter, Backspace, Caps Lock, Escape, and Delete are
+;; deliberately unassigned; they do not settle a pending HRM.
+(defhands
+  (left
+    f1 f2 f3 f4 f5 f6
+    grv 1 2 3 4 5
+    q w e r t
+    a s d f g
+    z x c v b)
+
+  (right
+    f7 f8 f9 f10 f11 f12
+    6 7 8 9 0 - =
+    y u i o p [ ] \
+    h j k l ; '
+    n m , . /
+    up left down rght))
+
+(defvar
+  hrm-timeout 300
+  tap-repress 160
+  combo-timeout 45
+)
+
+(defalias
+  ;; tap-hold-opposite-hand-release waits for the opposite-hand target key's
+  ;; release before resolving the decision. Once resolved, its modifier stays
+  ;; held until the home-row key itself is released.
+  ;;
+  ;; same-hand ignore makes stacked modifiers first-class: multiple HRMs on
+  ;; one hand can remain pending until an opposite-hand target resolves them.
+  ;; timeout tap means holding an HRM by itself produces its letter, not a mod.
+
+  hr-a (tap-hold-opposite-hand-release $hrm-timeout a lmet
+         (same-hand ignore)
+         (unknown-hand ignore)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-s (tap-hold-opposite-hand-release $hrm-timeout s lalt
+         (same-hand ignore)
+         (unknown-hand ignore)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-d (tap-hold-opposite-hand-release $hrm-timeout d lctl
+         (same-hand ignore)
+         (unknown-hand ignore)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-f (tap-hold-opposite-hand-release $hrm-timeout f lsft
+         (same-hand ignore)
+         (unknown-hand ignore)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-j (tap-hold-opposite-hand-release $hrm-timeout j rsft
+         (same-hand ignore)
+         (unknown-hand ignore)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-k (tap-hold-opposite-hand-release $hrm-timeout k rctl
+         (same-hand ignore)
+         (unknown-hand ignore)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-l (tap-hold-opposite-hand-release $hrm-timeout l ralt
+         (same-hand ignore)
+         (unknown-hand ignore)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-; (tap-hold-opposite-hand-release $hrm-timeout ; rmet
+         (same-hand ignore)
+         (unknown-hand ignore)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  ;; More defensive Shift, if needed later:
+  ;;   - change (same-hand ignore) to (same-hand tap) in hr-f and hr-j
+  ;;   - append (require-prior-idle 220) to those two actions
+  ;; This protects typing more aggressively but prevents Shift from stacking
+  ;; with another HRM on the same hand. Dedicated Shift remains unaffected.
+)
+
+;; Framework Laptop US keyboard. The Fn key is not visible to Kanata.
+(defsrc
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  del
+
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+
+  lctl lmet lalt            spc            ralt rctl
+                                      left up down rght
+)
+
+(deflayer base
+  esc  f1    f2    f3    f4    f5   f6   f7    f8    f9    f10   f11   f12  del
+
+  grv  1     2     3     4     5    6    7     8     9     0     -     =     bspc
+
+  tab  q     w     e     r     t    y    u     i     o     p     [     ]     \
+
+  caps @hr-a @hr-s @hr-d @hr-f g    h    @hr-j @hr-k @hr-l @hr-; '     ret
+
+  lsft z     x     c     v     b    n    m     ,     .     /     rsft
+
+  lctl lmet  lalt              spc              ralt rctl
+                                          left up down rght
+)
+
+(defchordsv2
+  ;; Escape releases as soon as either combo key is released.
+  (f j) esc $combo-timeout first-release ()
+
+  ;; Modifier combos remain held until both participating keys are released.
+  ;; They use distinct left/right modifier keycodes.
+  (f d) (multi lctl lsft) $combo-timeout all-released ()
+  (j k) (multi rsft rctl) $combo-timeout all-released ()
+)
