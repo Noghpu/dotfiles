@@ -81,6 +81,18 @@ window-rule {
     variable-refresh-rate true
 }
 
+// Youtube PiP
+window-rule {
+    match app-id="zen" title="^Picture-in-Picture$"
+
+    open-floating true
+
+    default-column-width { fixed 480; }
+    default-window-height { fixed 270; }
+
+    default-floating-position x=8 y=8 relative-to="bottom-right"
+}
+
 // Disable the built-in recent-window shortcuts; Super+Tab opens the overview.
 recent-windows {
     binds {}
@@ -96,7 +108,6 @@ binds {
     // === Intentionally Unused ===
     // Persistent no-op overrides for personal and CachyOS bindings.
     Mod+Ctrl+Return repeat=false { spawn; }
-    Mod+Shift+Return repeat=false { spawn; }
     Mod+Alt+L repeat=false { spawn; }
     Mod+Shift+N repeat=false { spawn; }
     Mod+Ctrl+Shift+R repeat=false { spawn; }
@@ -115,7 +126,7 @@ binds {
 
     // === Application Launchers ===
     Mod+Return { spawn "kitty"; }
-    Mod+P repeat=false {
+    Mod+Shift+Return repeat=false {
         spawn "session-launcher";
     }
     Mod+Space {
