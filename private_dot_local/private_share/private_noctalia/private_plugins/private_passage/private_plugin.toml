@@ -1,0 +1,32 @@
+id = "noghpu/passage"
+name = "Passage"
+version = "0.1.0"
+plugin_api = 13
+author = "Noghpu"
+license = "MIT"
+dependencies = ["passage", "wtype"]
+tags = ["launcher", "panel", "privacy", "utility"]
+icon = "key"
+description = "Search the passage store and type a field into the focused window."
+
+[[launcher_provider]]
+id = "search"
+entry = "launcher.luau"
+prefix = "passage"
+glyph = "key"
+include_in_global_search = false
+debounce_ms = 200
+
+[[panel]]
+id = "vault"
+entry = "panel.luau"
+width = 760
+height = 520
+placement = "floating"
+position = "center"
+capture_keys = [
+  "ctrl+j", "ctrl+k",
+  "alt+j", "alt+k",
+  "ctrl+1", "ctrl+2", "ctrl+3", "ctrl+4", "ctrl+5",
+  "ctrl+6", "ctrl+7", "ctrl+8", "ctrl+9",
+]

@@ -135,6 +135,9 @@ binds {
     Mod+V {
         spawn "noctalia" "msg" "panel-toggle" "clipboard";
     }
+    Mod+P {
+        spawn "noctalia" "msg" "panel-toggle" "noghpu/passage:vault";
+    }
     Mod+Comma {
         spawn "noctalia" "msg" "settings-toggle";
     }

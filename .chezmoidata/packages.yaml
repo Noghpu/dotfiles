@@ -42,6 +42,7 @@ packages:
         repo:
           - kitty
           - ttf-jetbrains-mono-nerd
+          - wtype
           - zen-browser-bin
         aur: []
         binaries: []

@@ -1,0 +1,105 @@
+#!/usr/bin/env -S fish --no-config
+# Read-only passage front end for the Noctalia vault plugin.
+#
+# Entry format — line 1 is the password, as passage already stores it:
+#
+#     s3cret
+#     login: noghpu
+#     url: https://github.com/login
+#     fill: login tab password
+#
+# Fields are numbered in file order: 1 is always the password, then every
+# "key: value" line. Typing a "fill" field types its tokens in order, where a
+# token is "tab", "enter", or the name of another field.
+#
+# No subcommand prints a secret value. "list" and "fields" print names; "type"
+# writes to the virtual keyboard and returns only an exit status.
+
+set -q PASSAGE_DIR; or set -g PASSAGE_DIR $HOME/.passage/store
+
+function usage
+    echo "usage: passage-fill list | fields <entry> | type <entry> <field-index>" >&2
+    exit 2
+end
+
+function die --argument-names message
+    echo $message >&2
+    exit 1
+end
+
+# Fills the names/values lists with the entry's fields, in file order.
+function parse_entry --argument-names entry
+    set -l secret (passage show $entry)
+    or die "cannot read $entry"
+
+    set -g names password
+    set -g values $secret[1]
+
+    for line in $secret[2..]
+        if string match -q -- '*: *' $line
+            set -l parts (string split -m1 ': ' -- $line)
+            set -a names $parts[1]
+            set -a values $parts[2]
+        end
+    end
+end
+
+function value_of --argument-names name
+    for i in (seq (count $names))
+        if test "$names[$i]" = "$name"
+            printf '%s' $values[$i]
+            return 0
+        end
+    end
+    return 1
+end
+
+function type_text --argument-names text
+    printf '%s' $text | wtype -
+end
+
+function type_field --argument-names index
+    if test "$names[$index]" != fill
+        type_text $values[$index]
+        return
+    end
+
+    for token in (string split -n ' ' -- $values[$index])
+        switch $token
+            case tab
+                wtype -k Tab
+            case enter
+                wtype -k Return
+            case '*'
+                set -l value (value_of $token)
+                or die "fill: no field named '$token'"
+                type_text $value
+        end
+    end
+end
+
+switch "$argv[1]"
+    case list
+        test (count $argv) -eq 1; or usage
+        cd $PASSAGE_DIR; or die "no store at $PASSAGE_DIR"
+        find . -name '*.age' -not -path '*/.*' -printf '%P\n' \
+            | string replace -r '\.age$' '' \
+            | sort
+    case fields
+        test (count $argv) -eq 2; or usage
+        parse_entry $argv[2]
+        printf '%s\n' $names
+    case type
+        test (count $argv) -eq 3; or usage
+        string match -qr '^[0-9]+$' -- $argv[3]; or usage
+        parse_entry $argv[2]
+        if test $argv[3] -lt 1; or test $argv[3] -gt (count $names)
+            die "$argv[2] has no field $argv[3]"
+        end
+        # The caller is a panel or launcher that has to close and hand focus
+        # back before anything is typed.
+        sleep 0.15
+        type_field $argv[3]
+    case '*'
+        usage
+end
