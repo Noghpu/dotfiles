@@ -1,4 +1,5 @@
 {{- if eq .chezmoi.os "linux" -}}
+{{- $marker := joinPath .chezmoi.homeDir ".local/state/chezmoi/packages-incomplete" -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -7,6 +8,14 @@ set -euo pipefail
 if ! command -v pacman >/dev/null 2>&1; then
     exit 0
 fi
+
+# Package hosts go down and routes to them break — the AUR especially, since it
+# has no mirrors. The rest of the apply is still worth doing when that happens,
+# so a failed install only warns here. Nothing is silently forgotten: an
+# incomplete run stamps the marker below, which changes this script's rendered
+# contents and so makes chezmoi run it again on the next apply.
+marker={{ $marker | quote }}
+# last-incomplete-run: {{ if stat $marker }}{{ include $marker }}{{ end }}
 
 repo_packages=(
 {{- range $roleName := .packages.arch.enabledRoles }}
@@ -20,7 +29,8 @@ repo_packages=(
 # Arch/CachyOS mirrors retain only current package versions. Refreshing the
 # databases without upgrading would create an unsupported partial-upgrade
 # state, so install the manifest as part of one full system upgrade.
-sudo pacman -Syu --needed --noconfirm "${repo_packages[@]}"
+sudo pacman -Syu --needed --noconfirm "${repo_packages[@]}" ||
+    echo "pacman could not install the repo manifest; continuing" >&2
 
 aur_packages=(
 {{- range $roleName := .packages.arch.enabledRoles }}
@@ -33,9 +43,19 @@ aur_packages=(
 
 if ((${#aur_packages[@]})); then
     if ! command -v yay >/dev/null 2>&1; then
-        echo "yay was not installed; cannot install AUR packages" >&2
-        exit 1
+        echo "yay was not installed; skipping AUR packages" >&2
+    else
+        yay -S --needed --noconfirm "${aur_packages[@]}" ||
+            echo "yay could not install the AUR manifest; continuing" >&2
     fi
-    yay -S --needed --noconfirm "${aur_packages[@]}"
+fi
+
+if missing=$(pacman -T "${repo_packages[@]}" "${aur_packages[@]}"); then
+    rm -f "$marker"
+else
+    mkdir -p "$(dirname "$marker")"
+    date +%s >"$marker"
+    echo "still missing: $(tr '\n' ' ' <<<"$missing")" >&2
+    echo "the next chezmoi apply will retry them" >&2
 fi
 {{- end }}

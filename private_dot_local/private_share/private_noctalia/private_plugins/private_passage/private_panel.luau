@@ -86,8 +86,10 @@ local function typeField(index)
   local count = #fieldsOf(entry)
   if count > 0 and (index < 1 or index > count) then return end
 
-  panel.close()
+  -- Spawn before closing: panel.close() tears down this entry, so anything
+  -- after it may not run. passage-fill waits for focus to come back.
   noctalia.runAsync("passage-fill type " .. shellEscape(entry) .. " " .. tostring(index))
+  panel.close()
 end
 
 local function entryRows(list)

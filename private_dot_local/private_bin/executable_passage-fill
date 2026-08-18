@@ -54,6 +54,19 @@ function value_of --argument-names name
     return 1
 end
 
+# A panel or launcher has to close before anything is typed, and niri takes
+# ~270ms to hand keyboard focus back. Typing into an unfocused compositor is
+# silently dropped, so wait for a real window before starting.
+function await_focus
+    for i in (seq 60)
+        if not string match -q null -- (niri msg -j focused-window 2>/dev/null)
+            sleep 0.05
+            return
+        end
+        sleep 0.025
+    end
+end
+
 function type_text --argument-names text
     printf '%s' $text | wtype -
 end
@@ -96,9 +109,7 @@ switch "$argv[1]"
         if test $argv[3] -lt 1; or test $argv[3] -gt (count $names)
             die "$argv[2] has no field $argv[3]"
         end
-        # The caller is a panel or launcher that has to close and hand focus
-        # back before anything is typed.
-        sleep 0.15
+        await_focus
         type_field $argv[3]
     case '*'
         usage
