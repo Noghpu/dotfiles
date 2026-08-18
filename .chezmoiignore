@@ -7,35 +7,3 @@ AppData/
 # with a little config. Never manage it.
 .claude.json
 .claude.json.backup
-
-# Claude Code: manage user config only. Everything else under ~/.claude is
-# runtime state (sessions, projects, history, shell snapshots, caches, backups)
-# or credentials, so ignore the whole dir and re-allow the config files.
-{{- if not (lookPath "claude") }}
-.claude/
-{{- else }}
-.claude/*
-!.claude/CLAUDE.md
-!.claude/settings.json
-!.claude/keybindings.json
-!.claude/agents
-!.claude/commands
-!.claude/skills
-!.claude/hooks
-!.claude/output-styles
-{{- end }}
-
-# Codex CLI: same deal for ~/.codex. auth.json holds credentials; sessions/,
-# history.jsonl, log/, plugins/ and generated_images/ are state.
-# skills/.system/ ships with the binary, so it stays ignored.
-{{- if not (lookPath "codex") }}
-.codex/
-{{- else }}
-.codex/*
-!.codex/config.toml
-!.codex/AGENTS.md
-!.codex/prompts
-!.codex/skills
-.codex/skills/.system
-!.codex/themes
-{{- end }}
