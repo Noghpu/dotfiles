@@ -12,7 +12,7 @@
 
   ;; Immediately type an HRM's letter when it follows another key within
   ;; this window. This keeps normal typing responsive and tap-biased.
-  tap-hold-require-prior-idle 150
+  tap-hold-require-prior-idle 200
 )
 
 ;; Physical handedness. The hardware Fn key is handled by the keyboard firmware
@@ -36,7 +36,7 @@
     up left down rght))
 
 (defvar
-  hrm-timeout 300
+  hrm-timeout 2000
   tap-repress 160
   combo-timeout 45
 )
@@ -46,63 +46,72 @@
   ;; release before resolving the decision. Once resolved, its modifier stays
   ;; held until the home-row key itself is released.
   ;;
-  ;; same-hand ignore makes stacked modifiers first-class: multiple HRMs on
-  ;; one hand can remain pending until an opposite-hand target resolves them.
+  ;; Same-hand and neutral/unknown keys resolve to taps immediately. This
+  ;; favors ordinary typing over stacking multiple HRMs on the same hand.
   ;; timeout tap means holding an HRM by itself produces its letter, not a mod.
 
   hr-a (tap-hold-opposite-hand-release $hrm-timeout a lmet
-         (same-hand ignore)
-         (unknown-hand ignore)
+         (same-hand tap)
+         (unknown-hand tap)
          (timeout tap)
          (tap-repress-timeout $tap-repress))
 
   hr-s (tap-hold-opposite-hand-release $hrm-timeout s lalt
-         (same-hand ignore)
-         (unknown-hand ignore)
+         (same-hand tap)
+         (unknown-hand tap)
          (timeout tap)
          (tap-repress-timeout $tap-repress))
 
   hr-d (tap-hold-opposite-hand-release $hrm-timeout d lctl
-         (same-hand ignore)
-         (unknown-hand ignore)
+         (same-hand tap)
+         (unknown-hand tap)
          (timeout tap)
          (tap-repress-timeout $tap-repress))
 
   hr-f (tap-hold-opposite-hand-release $hrm-timeout f lsft
-         (same-hand ignore)
-         (unknown-hand ignore)
+         (same-hand tap)
+         (unknown-hand tap)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-g (tap-hold-opposite-hand-release $hrm-timeout g lmet
+         (same-hand tap)
+         (unknown-hand tap)
+         (timeout tap)
+         (tap-repress-timeout $tap-repress))
+
+  hr-h (tap-hold-opposite-hand-release $hrm-timeout h rmet
+         (same-hand tap)
+         (unknown-hand tap)
          (timeout tap)
          (tap-repress-timeout $tap-repress))
 
   hr-j (tap-hold-opposite-hand-release $hrm-timeout j rsft
-         (same-hand ignore)
-         (unknown-hand ignore)
+         (same-hand tap)
+         (unknown-hand tap)
          (timeout tap)
          (tap-repress-timeout $tap-repress))
 
   hr-k (tap-hold-opposite-hand-release $hrm-timeout k rctl
-         (same-hand ignore)
-         (unknown-hand ignore)
+         (same-hand tap)
+         (unknown-hand tap)
          (timeout tap)
          (tap-repress-timeout $tap-repress))
 
   hr-l (tap-hold-opposite-hand-release $hrm-timeout l ralt
-         (same-hand ignore)
-         (unknown-hand ignore)
+         (same-hand tap)
+         (unknown-hand tap)
          (timeout tap)
          (tap-repress-timeout $tap-repress))
 
   hr-; (tap-hold-opposite-hand-release $hrm-timeout ; rmet
-         (same-hand ignore)
-         (unknown-hand ignore)
+         (same-hand tap)
+         (unknown-hand tap)
          (timeout tap)
          (tap-repress-timeout $tap-repress))
 
-  ;; More defensive Shift, if needed later:
-  ;;   - change (same-hand ignore) to (same-hand tap) in hr-f and hr-j
-  ;;   - append (require-prior-idle 220) to those two actions
-  ;; This protects typing more aggressively but prevents Shift from stacking
-  ;; with another HRM on the same hand. Dedicated Shift remains unaffected.
+  ;; Dedicated Shift remains available for cases where same-hand modifier
+  ;; stacking would otherwise be needed.
 )
 
 ;; Framework Laptop US keyboard. The Fn key is not visible to Kanata.
@@ -128,7 +137,7 @@
 
   tab  q     w     e     r     t    y    u     i     o     p     [     ]     \
 
-  caps @hr-a @hr-s @hr-d @hr-f g    h    @hr-j @hr-k @hr-l @hr-; '     ret
+  caps @hr-a @hr-s @hr-d @hr-f @hr-g @hr-h @hr-j @hr-k @hr-l @hr-; '     ret
 
   lsft z     x     c     v     b    n    m     ,     .     /     rsft
 

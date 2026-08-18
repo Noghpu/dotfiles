@@ -1,0 +1,31 @@
+{{- if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Re-run this hook whenever the managed Kanata configuration changes.
+# config-sha256: {{ include (joinPath .chezmoi.sourceDir "private_dot_config/private_kanata/private_kanata.kbd") | sha256sum }}
+
+if ! command -v kanata >/dev/null 2>&1 || ! command -v systemctl >/dev/null 2>&1; then
+    exit 0
+fi
+
+dropin_dir=/etc/systemd/system/kanata.service.d
+dropin="$dropin_dir/override.conf"
+override='[Service]
+ExecStart=
+ExecStart=/usr/bin/kanata --cfg {{ joinPath .chezmoi.homeDir ".config/kanata/kanata.kbd" }} --no-wait'
+
+changed=false
+if ! printf '%s\n' "$override" | sudo cmp --silent - "$dropin"; then
+    sudo install -d -m 0755 "$dropin_dir"
+    printf '%s\n' "$override" | sudo tee "$dropin" >/dev/null
+    sudo chmod 0644 "$dropin"
+    sudo systemctl daemon-reload
+    changed=true
+fi
+
+sudo systemctl enable kanata.service
+if [[ "$changed" == true ]] || ! systemctl is-active --quiet kanata.service; then
+    sudo systemctl restart kanata.service
+fi
+{{- end }}
