@@ -12,21 +12,46 @@
 ;; key pressed just after it, and either an opposite-hand key completed on top of
 ;; it or a deliberate hold past the timeout. Everything else types the letter.
 ;;
-;; Multi-modifier shortcuts are not built by stacking undecided home-row keys on
-;; top of each other. Exactly one home-row key makes a tap-hold decision; once it
-;; resolves to a modifier it switches its own hand to the lmods/rmods layer,
-;; where the remaining home-row keys are plain modifiers with no decision left to
-;; make. There are two ways in:
+;; One rule decides every home-row key, and it is prior idle. A home-row key
+;; pressed while typing is in progress is its letter, full stop. Only a key that
+;; starts a burst is a modifier candidate at all, and even then it becomes a
+;; modifier only if an opposite-hand key completes on top of it or it is held
+;; past the timeout. No home-row key is paired to any other: F+J below is the
+;; single exception, and it is bounded by a timing window rather than by which
+;; keys happen to follow which.
 ;;
-;;   - Roll onto the opposite hand: K then A is Ctrl+A, resolved the moment A is
-;;     released. Add more modifiers from the K hand once inside the layer.
+;; Multi-modifier shortcuts are not built by stacking undecided home-row keys on
+;; top of each other. One home-row key makes a tap-hold decision; the moment it
+;; resolves to a modifier it switches its own hand to the lmods/rmods layer,
+;; where every remaining home-row key is a plain modifier with no decision left
+;; to make. Each modifier re-asserts the layer while it is held, so the layer
+;; outlives whichever key opened it and modifiers can be released one at a time:
+;; open with D, add Shift on F, release D, and Shift is left holding the layer.
+;;
+;; There are two ways in:
+;;
+;;   - Roll onto the opposite hand: K then A is Ctrl+A, resolved when A is
+;;     released. Add further modifiers from the K hand once inside the layer.
 ;;   - Hold one home-row key past the timeout: hold D, then F S A are literally
 ;;     Shift Alt Meta and any key on either hand is the target, same hand
-;;     included. This is what Ctrl+click and Ctrl+Space need.
+;;     included. This is what Ctrl+click, Ctrl+Space and Ctrl+Shift need.
 ;;
-;; Ctrl+Shift is the most used pair, so it also gets a chord that skips the wait:
-;; D+F or J+K pressed together is Ctrl+Shift and opens that hand's layer at once,
-;; which makes a four-modifier shortcut a chord plus two taps.
+;; F+J is Escape, as a chord, which is the one form of it whose exposure is
+;; bounded by a timing window rather than open-ended. The earlier attempt at it
+;; through hold-on-press had no window at all -- F followed by J was Escape at
+;; any spacing -- which is what made it eat input.
+;;
+;; The window is the only guard, deliberately. There is no chords-v2-min-idle:
+;; leaving Escape closed for a while after the last keystroke would break the
+;; case it exists for, which is leaving vim insert mode the instant a word is
+;; finished. So the chord stays armed mid-word, and the timing carries it: two
+;; keys landing within combo-timeout of each other is a gesture, not typing.
+;;
+;; The window is not free: it delays F and J themselves, so a shortcut starting
+;; on either is eaten when its target follows inside combo-timeout. Only those
+;; two keys pay it. This was previously blamed on chords delaying the whole
+;; keyboard, which was wrong: the config measured then also chorded D+F and J+K,
+;; so the keys that looked like innocent bystanders were participants.
 ;;
 ;; Meta is on A and G, mirrored on ; and H, so both a pinky and an index-finger
 ;; Meta are available to compare. Holding one never sends a lone Super to the
@@ -41,12 +66,6 @@
   ;; get wrong. This covers every home-row key inside a burst of typing; only a
   ;; key that starts a burst is ever a modifier candidate at all.
   tap-hold-require-prior-idle 200
-
-  ;; The same idea applied to chords: after any non-chord keypress, chord
-  ;; matching is skipped entirely for this long. Mid-typing, D+F and F+J are
-  ;; never buffered and never delay a keystroke; the chords only come alive at
-  ;; the start of a burst, which is the only time a shortcut can start.
-  chords-v2-min-idle 200
 )
 
 ;; Caps Lock and Escape are swapped here rather than through an xkb option.
@@ -84,7 +103,15 @@
   ;; well before it expires.
   hrm-hold 300
   tap-repress 160
-  combo-timeout 45
+
+  ;; The F+J window, and the only thing guarding it. Escape fires when both keys
+  ;; land within this long; a shortcut starting on F or J is eaten if its target
+  ;; follows within it; and an "fj" typed this fast becomes Escape. All three are
+  ;; the same window, so this number is the whole tradeoff: wide enough for a
+  ;; deliberate two-finger press (10-30ms), under the gap between pressing a
+  ;; modifier and reaching its target, and under any real typing roll -- at 45ms
+  ;; spacing every sequence of home-row keys types cleanly, "fjord" included.
+  combo-timeout 35
 
   ;; Dedicated modifier keys must not settle a pending home-row modifier;
   ;; they are meant to stack with one. Reused by every HRM alias below.
@@ -106,6 +133,15 @@
 (defalias
   hold-lmet (multi lmet f24 (layer-while-held lmods) (macro 5 (on-press tap-vkey rel-f24)))
   hold-rmet (multi rmet f24 (layer-while-held rmods) (macro 5 (on-press tap-vkey rel-f24)))
+
+  ;; Every modifier re-asserts its own layer while held, so the layer outlives
+  ;; the key that opened it and survives releasing modifiers one at a time.
+  ml-alt (multi lalt (layer-while-held lmods))
+  ml-ctl (multi lctl (layer-while-held lmods))
+  ml-sft (multi lsft (layer-while-held lmods))
+  mr-alt (multi ralt (layer-while-held rmods))
+  mr-ctl (multi rctl (layer-while-held rmods))
+  mr-sft (multi rsft (layer-while-held rmods))
 
   ;; tap-hold-opposite-hand-release waits for the opposite-hand target key to be
   ;; pressed AND released before committing to the modifier. This is what makes
@@ -135,7 +171,7 @@
          (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-s (tap-hold-opposite-hand-release $hrm-hold s (multi lalt (layer-while-held lmods))
+  hr-s (tap-hold-opposite-hand-release $hrm-hold s @ml-alt
          (same-hand tap)
          (unknown-hand tap)
          $hrm-neutral
@@ -143,7 +179,7 @@
          (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-d (tap-hold-opposite-hand-release $hrm-hold d (multi lctl (layer-while-held lmods))
+  hr-d (tap-hold-opposite-hand-release $hrm-hold d @ml-ctl
          (same-hand tap)
          (unknown-hand tap)
          $hrm-neutral
@@ -151,7 +187,7 @@
          (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-f (tap-hold-opposite-hand-release $hrm-hold f (multi lsft (layer-while-held lmods))
+  hr-f (tap-hold-opposite-hand-release $hrm-hold f @ml-sft
          (same-hand tap)
          (unknown-hand tap)
          $hrm-neutral
@@ -175,7 +211,7 @@
          (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-j (tap-hold-opposite-hand-release $hrm-hold j (multi rsft (layer-while-held rmods))
+  hr-j (tap-hold-opposite-hand-release $hrm-hold j @mr-sft
          (same-hand tap)
          (unknown-hand tap)
          $hrm-neutral
@@ -183,7 +219,7 @@
          (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-k (tap-hold-opposite-hand-release $hrm-hold k (multi rctl (layer-while-held rmods))
+  hr-k (tap-hold-opposite-hand-release $hrm-hold k @mr-ctl
          (same-hand tap)
          (unknown-hand tap)
          $hrm-neutral
@@ -191,7 +227,7 @@
          (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-l (tap-hold-opposite-hand-release $hrm-hold l (multi ralt (layer-while-held rmods))
+  hr-l (tap-hold-opposite-hand-release $hrm-hold l @mr-alt
          (same-hand tap)
          (unknown-hand tap)
          $hrm-neutral
@@ -207,22 +243,12 @@
          (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  ;; Chord targets. Ctrl+Shift both presses the pair and opens the hand's layer,
-  ;; so the other two modifiers are one tap away each.
-  cs-l (multi lctl lsft (layer-while-held lmods))
-  cs-r (multi rctl rsft (layer-while-held rmods))
 )
 
-;; D+F and J+K are Ctrl+Shift. F+J is Escape. None of these three pairs is an
-;; English bigram, and chords-v2-min-idle keeps them from being consulted at all
-;; while typing is in progress, so they cost ordinary typing nothing.
-;;
-;; These are disabled inside lmods and rmods: there the same keys are already
-;; plain modifiers, and a chord would fight them.
+;; first-release so Escape repeats no further than one keypress, and disabled on
+;; the modifier layers, where F and J are already modifiers.
 (defchordsv2
-  (d f) @cs-l $combo-timeout all-released (lmods rmods)
-  (j k) @cs-r $combo-timeout all-released (lmods rmods)
-  (f j) esc   $combo-timeout first-release (lmods rmods))
+  (f j) esc $combo-timeout first-release (lmods rmods))
 
 ;; Framework Laptop US keyboard. The Fn key is not visible to Kanata.
 (defsrc
@@ -274,9 +300,9 @@
 ;; These must stay below the base layer: Kanata treats the first layer in the
 ;; file as the default one.
 (deflayermap (lmods)
-  a lmet  s lalt  d lctl  f lsft  g lmet
-  h h     j j     k k     l l     ; ;)
+  a @hold-lmet  s @ml-alt  d @ml-ctl  f @ml-sft  g @hold-lmet
+  h h           j j        k k        l l        ; ;)
 
 (deflayermap (rmods)
-  h rmet  j rsft  k rctl  l ralt  ; rmet
-  a a     s s     d d     f f     g g)
+  h @hold-rmet  j @mr-sft  k @mr-ctl  l @mr-alt  ; @hold-rmet
+  a a           s s        d d        f f        g g)
