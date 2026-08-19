@@ -7,9 +7,11 @@
 
 input {
     keyboard {
+        // Caps Lock and Escape are swapped in the Kanata configuration rather
+        // than here, so the swap holds for every compositor and so Kanata's own
+        // Escape output is not swapped back into Caps Lock on the way out.
         xkb {
             layout "us,ch"
-            options "caps:swapescape"
         }
     }
 }

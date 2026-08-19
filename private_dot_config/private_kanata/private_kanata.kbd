@@ -49,6 +49,10 @@
   chords-v2-min-idle 200
 )
 
+;; Caps Lock and Escape are swapped here rather than through an xkb option.
+;; Doing it downstream of Kanata swapped Kanata's own Escape output back into
+;; Caps Lock, which is what the F+J chord below was really emitting.
+;;
 ;; Physical handedness. The hardware Fn key is handled by the keyboard firmware
 ;; and does not emit a normal keycode, so it is not part of this map. Tab, Enter,
 ;; Backspace, Escape, Caps Lock, and Delete are placed on the hand that actually
@@ -242,13 +246,13 @@
 ;; first thing to drop back to plain letters. They stay Meta in the layers below
 ;; either way, so dropping them here costs no shortcut.
 (deflayer base
-  esc  f1    f2    f3    f4    f5   f6   f7    f8    f9    f10   f11   f12  del
+  caps f1    f2    f3    f4    f5   f6   f7    f8    f9    f10   f11   f12  del
 
   grv  1     2     3     4     5    6    7     8     9     0     -     =     bspc
 
   tab  q     w     e     r     t    y    u     i     o     p     [     ]     \
 
-  caps @hr-a @hr-s @hr-d @hr-f @hr-g @hr-h @hr-j @hr-k @hr-l @hr-; '     ret
+  esc  @hr-a @hr-s @hr-d @hr-f @hr-g @hr-h @hr-j @hr-k @hr-l @hr-; '     ret
 
   lsft z     x     c     v     b    n    m     ,     .     /     rsft
 
