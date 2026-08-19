@@ -15,17 +15,15 @@ override='[Service]
 ExecStart=
 ExecStart=/usr/bin/kanata --cfg {{ joinPath .chezmoi.homeDir ".config/kanata/kanata.kbd" }} --no-wait'
 
-changed=false
 if ! printf '%s\n' "$override" | sudo cmp --silent - "$dropin"; then
     sudo install -d -m 0755 "$dropin_dir"
     printf '%s\n' "$override" | sudo tee "$dropin" >/dev/null
     sudo chmod 0644 "$dropin"
     sudo systemctl daemon-reload
-    changed=true
 fi
 
+# This hook only re-runs when the drop-in or the managed config has changed, and
+# Kanata reads its config once at startup, so a restart is always what is wanted.
 sudo systemctl enable kanata.service
-if [[ "$changed" == true ]] || ! systemctl is-active --quiet kanata.service; then
-    sudo systemctl restart kanata.service
-fi
+sudo systemctl restart kanata.service
 {{- end }}

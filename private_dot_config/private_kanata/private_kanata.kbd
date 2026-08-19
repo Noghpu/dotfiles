@@ -3,116 +3,222 @@
 ;;   A S D F = left  Meta Alt Ctrl Shift
 ;;   J K L ; = right Shift Ctrl Alt  Meta
 ;;
-;; Home-row modifiers are intended for shortcuts. Dedicated Shift remains
-;; available for typing capital letters.
+;; Home-row modifiers are for shortcuts only. Dedicated Shift types capitals,
+;; so the home-row Shift never has to win a race against ordinary typing and is
+;; tuned as defensively as every other home-row key.
+;;
+;; Typing always wins. A home-row key only becomes a modifier when nothing about
+;; the keystroke looks like typing: no key pressed just before it, no same-hand
+;; key pressed just after it, and either an opposite-hand key completed on top of
+;; it or a deliberate hold past the timeout. Everything else types the letter.
+;;
+;; Multi-modifier shortcuts are not built by stacking undecided home-row keys on
+;; top of each other. Exactly one home-row key makes a tap-hold decision; once it
+;; resolves to a modifier it switches its own hand to the lmods/rmods layer,
+;; where the remaining home-row keys are plain modifiers with no decision left to
+;; make. There are two ways in:
+;;
+;;   - Roll onto the opposite hand: K then A is Ctrl+A, resolved the moment A is
+;;     released. Add more modifiers from the K hand once inside the layer.
+;;   - Hold one home-row key past the timeout: hold D, then F S A are literally
+;;     Shift Alt Meta and any key on either hand is the target, same hand
+;;     included. This is what Ctrl+click and Ctrl+Space need.
+;;
+;; Ctrl+Shift is the most used pair, so it also gets a chord that skips the wait:
+;; D+F or J+K pressed together is Ctrl+Shift and opens that hand's layer at once,
+;; which makes a four-modifier shortcut a chord plus two taps.
+;;
+;; Meta is on A and G, mirrored on ; and H, so both a pinky and an index-finger
+;; Meta are available to compare. Holding one never sends a lone Super to the
+;; desktop; see hold-lmet below.
 
 (defcfg
   process-unmapped-keys yes
   concurrent-tap-hold yes
 
-  ;; Immediately type an HRM's letter when it follows another key within
-  ;; this window. This keeps normal typing responsive and tap-biased.
+  ;; The primary defense. A home-row key pressed within this window of any other
+  ;; key is its letter, immediately, with no waiting state and no decision to
+  ;; get wrong. This covers every home-row key inside a burst of typing; only a
+  ;; key that starts a burst is ever a modifier candidate at all.
   tap-hold-require-prior-idle 200
+
+  ;; The same idea applied to chords: after any non-chord keypress, chord
+  ;; matching is skipped entirely for this long. Mid-typing, D+F and F+J are
+  ;; never buffered and never delay a keystroke; the chords only come alive at
+  ;; the start of a burst, which is the only time a shortcut can start.
+  chords-v2-min-idle 200
 )
 
 ;; Physical handedness. The hardware Fn key is handled by the keyboard firmware
-;; and does not emit a normal keycode, so it is not part of this map. Dedicated
-;; modifiers, Space, Tab, Enter, Backspace, Caps Lock, Escape, and Delete are
-;; deliberately unassigned; they do not settle a pending HRM.
+;; and does not emit a normal keycode, so it is not part of this map. Tab, Enter,
+;; Backspace, Escape, Caps Lock, and Delete are placed on the hand that actually
+;; reaches them so that Shift+Tab, Ctrl+Backspace and friends resolve as holds.
+;; Space is deliberately unassigned: it is the one key common enough right after
+;; a home-row letter that treating it as a hold trigger would misfire. Dedicated
+;; modifiers are excluded via hrm-neutral below rather than by handedness.
 (defhands
   (left
-    f1 f2 f3 f4 f5 f6
+    esc f1 f2 f3 f4 f5 f6
     grv 1 2 3 4 5
-    q w e r t
-    a s d f g
+    tab q w e r t
+    caps a s d f g
     z x c v b)
 
   (right
-    f7 f8 f9 f10 f11 f12
-    6 7 8 9 0 - =
+    f7 f8 f9 f10 f11 f12 del
+    6 7 8 9 0 - = bspc
     y u i o p [ ] \
-    h j k l ; '
+    h j k l ; ' ret
     n m , . /
     up left down rght))
 
 (defvar
-  hrm-timeout 2000
+  ;; Hold this long with nothing else pressed to enter the modifier layer.
+  ;; Short enough to be usable for Ctrl+click, long enough that it is only ever
+  ;; reached by dwelling on a key deliberately: any same-hand key, any completed
+  ;; opposite-hand key, and any preceding keystroke all resolve the decision
+  ;; well before it expires.
+  hrm-hold 300
   tap-repress 160
   combo-timeout 45
+
+  ;; Dedicated modifier keys must not settle a pending home-row modifier;
+  ;; they are meant to stack with one. Reused by every HRM alias below.
+  hrm-neutral (neutral-keys lsft rsft lctl rctl lmet lalt ralt)
 )
+
+;; A lone Super press-and-release opens the desktop launcher, which a home-row
+;; Meta would trigger every time it was held and then released without a target.
+;; f24 is kanata's conventional placeholder: a real keycode nothing binds. The
+;; hold presses it alongside Meta, so the desktop sees a non-modifier key during
+;; the hold and the release is never lone. It is let go 5ms later rather than
+;; held, so it cannot auto-repeat underneath the modifier.
+;;
+;; Alt has the same lone-press behaviour in GTK and Qt, where it focuses the
+;; menu bar. Add f24 and the release macro to hr-s and hr-l to cover that too.
+(defvirtualkeys
+  rel-f24 (release-key f24))
 
 (defalias
-  ;; tap-hold-opposite-hand-release waits for the opposite-hand target key's
-  ;; release before resolving the decision. Once resolved, its modifier stays
-  ;; held until the home-row key itself is released.
+  hold-lmet (multi lmet f24 (layer-while-held lmods) (macro 5 (on-press tap-vkey rel-f24)))
+  hold-rmet (multi rmet f24 (layer-while-held rmods) (macro 5 (on-press tap-vkey rel-f24)))
+
+  ;; tap-hold-opposite-hand-release waits for the opposite-hand target key to be
+  ;; pressed AND released before committing to the modifier. This is what makes
+  ;; the config safe for a rolling typist: in a roll the home-row key comes up
+  ;; while the next key is still down, and a home-row key released first is
+  ;; always its letter. Only dwelling on the home-row key past the other key's
+  ;; release produces a modifier.
   ;;
-  ;; Same-hand and neutral/unknown keys resolve to taps immediately. This
-  ;; favors ordinary typing over stacking multiple HRMs on the same hand.
-  ;; timeout tap means holding an HRM by itself produces its letter, not a mod.
+  ;; same-hand tap is the setting that matters most. A same-hand key press ends
+  ;; the decision immediately as a letter, so "sad", "flag", "ask" and every
+  ;; other same-hand roll emits without ever entering a waiting state. Stacking
+  ;; same-hand modifiers is not this action's job; the lmods/rmods layers below
+  ;; do that, and they do it without a pending decision to stall the key queue.
+  ;;
+  ;; neutral ignore lets a dedicated modifier stack with a pending HRM instead
+  ;; of collapsing it to a tap. unknown-hand tap keeps Space tap-biased; reach
+  ;; Ctrl+Space through the hold-then-layer path. timeout hold is the layer
+  ;; entry: a deliberate hold with nothing else pressed is a modifier. Hold a
+  ;; home-row key to repeat its letter by tapping it first, which tap-repress
+  ;; turns into an ordinary auto-repeat.
 
-  hr-a (tap-hold-opposite-hand-release $hrm-timeout a lmet
+  hr-a (tap-hold-opposite-hand-release $hrm-hold a @hold-lmet
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-s (tap-hold-opposite-hand-release $hrm-timeout s lalt
+  hr-s (tap-hold-opposite-hand-release $hrm-hold s (multi lalt (layer-while-held lmods))
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-d (tap-hold-opposite-hand-release $hrm-timeout d lctl
+  hr-d (tap-hold-opposite-hand-release $hrm-hold d (multi lctl (layer-while-held lmods))
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-f (tap-hold-opposite-hand-release $hrm-timeout f lsft
+  hr-f (tap-hold-opposite-hand-release $hrm-hold f (multi lsft (layer-while-held lmods))
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-g (tap-hold-opposite-hand-release $hrm-timeout g lmet
+  hr-g (tap-hold-opposite-hand-release $hrm-hold g @hold-lmet
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-h (tap-hold-opposite-hand-release $hrm-timeout h rmet
+  hr-h (tap-hold-opposite-hand-release $hrm-hold h @hold-rmet
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-j (tap-hold-opposite-hand-release $hrm-timeout j rsft
+  hr-j (tap-hold-opposite-hand-release $hrm-hold j (multi rsft (layer-while-held rmods))
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-k (tap-hold-opposite-hand-release $hrm-timeout k rctl
+  hr-k (tap-hold-opposite-hand-release $hrm-hold k (multi rctl (layer-while-held rmods))
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-l (tap-hold-opposite-hand-release $hrm-timeout l ralt
+  hr-l (tap-hold-opposite-hand-release $hrm-hold l (multi ralt (layer-while-held rmods))
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  hr-; (tap-hold-opposite-hand-release $hrm-timeout ; rmet
+  hr-; (tap-hold-opposite-hand-release $hrm-hold ; @hold-rmet
          (same-hand tap)
          (unknown-hand tap)
-         (timeout tap)
+         $hrm-neutral
+         (neutral ignore)
+         (timeout hold)
          (tap-repress-timeout $tap-repress))
 
-  ;; Dedicated Shift remains available for cases where same-hand modifier
-  ;; stacking would otherwise be needed.
+  ;; Chord targets. Ctrl+Shift both presses the pair and opens the hand's layer,
+  ;; so the other two modifiers are one tap away each.
+  cs-l (multi lctl lsft (layer-while-held lmods))
+  cs-r (multi rctl rsft (layer-while-held rmods))
 )
+
+;; D+F and J+K are Ctrl+Shift. F+J is Escape. None of these three pairs is an
+;; English bigram, and chords-v2-min-idle keeps them from being consulted at all
+;; while typing is in progress, so they cost ordinary typing nothing.
+;;
+;; These are disabled inside lmods and rmods: there the same keys are already
+;; plain modifiers, and a chord would fight them.
+(defchordsv2
+  (d f) @cs-l $combo-timeout all-released (lmods rmods)
+  (j k) @cs-r $combo-timeout all-released (lmods rmods)
+  (f j) esc   $combo-timeout first-release (lmods rmods))
 
 ;; Framework Laptop US keyboard. The Fn key is not visible to Kanata.
 (defsrc
@@ -130,6 +236,11 @@
                                       left up down rght
 )
 
+;; G and H are a second Meta alongside A and ;, kept so both positions can be
+;; compared in use. They are the frequency risk in this layer: H especially is
+;; common enough that if stray Metas show up while typing, these two are the
+;; first thing to drop back to plain letters. They stay Meta in the layers below
+;; either way, so dropping them here costs no shortcut.
 (deflayer base
   esc  f1    f2    f3    f4    f5   f6   f7    f8    f9    f10   f11   f12  del
 
@@ -145,12 +256,23 @@
                                           left up down rght
 )
 
-(defchordsv2
-  ;; Escape releases as soon as either combo key is released.
-  (f j) esc $combo-timeout first-release ()
+;; Once a home-row modifier on one hand has resolved, that whole hand becomes
+;; plain modifiers: no tap-hold decision, no timing, no way to get it wrong.
+;; The opposite hand's home row is pinned back to plain letters at the same
+;; time, so a target key there is instant and repeats normally instead of
+;; running its own tap-hold decision underneath a held modifier.
+;;
+;; That pinning is why all four modifiers live on each hand: a shortcut takes
+;; every modifier from one hand and its target from anywhere, rather than
+;; splitting modifiers across both. Every other key stays transparent, so
+;; same-hand targets like Ctrl+C work once the layer is open.
+;;
+;; These must stay below the base layer: Kanata treats the first layer in the
+;; file as the default one.
+(deflayermap (lmods)
+  a lmet  s lalt  d lctl  f lsft  g lmet
+  h h     j j     k k     l l     ; ;)
 
-  ;; Modifier combos remain held until both participating keys are released.
-  ;; They use distinct left/right modifier keycodes.
-  (f d) (multi lctl lsft) $combo-timeout all-released ()
-  (j k) (multi rsft rctl) $combo-timeout all-released ()
-)
+(deflayermap (rmods)
+  h rmet  j rsft  k rctl  l ralt  ; rmet
+  a a     s s     d d     f f     g g)
