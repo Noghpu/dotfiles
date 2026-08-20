@@ -5,15 +5,26 @@ set -euo pipefail
 # Re-run this hook whenever the managed Kanata configuration changes.
 # config-sha256: {{ include (joinPath .chezmoi.sourceDir "private_dot_config/private_kanata/private_kanata.kbd") | sha256sum }}
 
-if ! command -v kanata >/dev/null 2>&1 || ! command -v systemctl >/dev/null 2>&1; then
+# The home-row modifier layout needs a chords-v2 fix that has only shipped in a
+# prerelease, so the binary comes from the pinned upstream build that
+# install-binaries puts in /usr/local. That script sorts before this one, which
+# is why this file is named for the service rather than for enabling it. The
+# distribution package stays installed for its systemd unit, and is also the
+# fallback here when the pinned install did not happen.
+kanata_binary=/usr/local/bin/kanata
+if [[ ! -x "$kanata_binary" ]]; then
+    kanata_binary=$(command -v kanata || true)
+fi
+
+if [[ -z "$kanata_binary" ]] || ! command -v systemctl >/dev/null 2>&1; then
     exit 0
 fi
 
 dropin_dir=/etc/systemd/system/kanata.service.d
 dropin="$dropin_dir/override.conf"
-override='[Service]
+override="[Service]
 ExecStart=
-ExecStart=/usr/bin/kanata --cfg {{ joinPath .chezmoi.homeDir ".config/kanata/kanata.kbd" }} --no-wait'
+ExecStart=$kanata_binary --cfg {{ joinPath .chezmoi.homeDir ".config/kanata/kanata.kbd" }} --no-wait"
 
 if ! printf '%s\n' "$override" | sudo cmp --silent - "$dropin"; then
     sudo install -d -m 0755 "$dropin_dir"

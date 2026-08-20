@@ -7,7 +7,7 @@ installer_dir={{ joinPath .chezmoi.homeDir ".local/share/binary-install-scripts"
 {{- range $roleName := .packages.arch.enabledRoles }}
 {{- $role := index $.packages.arch.roles $roleName }}
 {{- range $binary := $role.binaries }}
-"$installer_dir/{{ $binary.script }}" --version {{ $binary.version | quote }}
+"$installer_dir/{{ $binary.script }}" --version {{ $binary.version | quote }}{{ if $binary.system }} --system{{ end }}
 {{- end }}
 {{- end }}
 {{- end }}

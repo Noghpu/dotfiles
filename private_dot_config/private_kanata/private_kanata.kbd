@@ -1,4 +1,4 @@
-;; Kanata 1.12+
+;; Kanata 1.12.1-prerelease-1 or newer; see the F+J note below for why.
 ;; Framework Laptop US-ANSI QWERTY with mirrored home-row modifiers:
 ;;   A S D F = left  Meta Alt Ctrl Shift
 ;;   J K L ; = right Shift Ctrl Alt  Meta
@@ -8,9 +8,9 @@
 ;; tuned as defensively as every other home-row key.
 ;;
 ;; Typing always wins. A home-row key only becomes a modifier when nothing about
-;; the keystroke looks like typing: no key pressed just before it, no same-hand
-;; key pressed just after it, and either an opposite-hand key completed on top of
-;; it or a deliberate hold past the timeout. Everything else types the letter.
+;; the keystroke looks like typing: no key pressed just before it, and either an
+;; opposite-hand key completed on top of it or a deliberate hold past the
+;; timeout. Everything else types the letter.
 ;;
 ;; One rule decides every home-row key, and it is prior idle. A home-row key
 ;; pressed while typing is in progress is its letter, full stop. Only a key that
@@ -20,21 +20,25 @@
 ;; single exception, and it is bounded by a timing window rather than by which
 ;; keys happen to follow which.
 ;;
-;; Multi-modifier shortcuts are not built by stacking undecided home-row keys on
-;; top of each other. One home-row key makes a tap-hold decision; the moment it
-;; resolves to a modifier it switches its own hand to the lmods/rmods layer,
-;; where every remaining home-row key is a plain modifier with no decision left
-;; to make. Each modifier re-asserts the layer while it is held, so the layer
-;; outlives whichever key opened it and modifiers can be released one at a time:
-;; open with D, add Shift on F, release D, and Shift is left holding the layer.
+;; However many modifiers a shortcut wants, exactly one tap-hold decision is
+;; made. The first home-row key of the group decides; the moment it resolves to
+;; a modifier it switches its own hand to the lmods/rmods layer, where every
+;; remaining home-row key is a plain modifier with no decision left to make.
+;; Each modifier re-asserts the layer while it is held, so the layer outlives
+;; whichever key opened it and modifiers can be released one at a time: open
+;; with D, add Shift on F, release D, and Shift is left holding the layer.
 ;;
 ;; There are two ways in:
 ;;
 ;;   - Roll onto the opposite hand: K then A is Ctrl+A, resolved when A is
 ;;     released. Add further modifiers from the K hand once inside the layer.
-;;   - Hold one home-row key past the timeout: hold D, then F S A are literally
-;;     Shift Alt Meta and any key on either hand is the target, same hand
-;;     included. This is what Ctrl+click, Ctrl+Space and Ctrl+Shift need.
+;;   - Press a group on one hand and hold it past the timeout. Same-hand keys
+;;     landing on an undecided one are queued rather than settling it, and they
+;;     replay into the layer the first key opens, so J K L held together is
+;;     Shift+Ctrl+Alt and A S D F is all four. Neither the order they were
+;;     pressed in nor the spacing between them matters. Once the layer is open,
+;;     any key on either hand is the target, same hand included -- which is what
+;;     Ctrl+click, Ctrl+Space and Ctrl+Shift need.
 ;;
 ;; F+J is Escape, as a chord, which is the one form of it whose exposure is
 ;; bounded by a timing window rather than open-ended. The earlier attempt at it
@@ -47,11 +51,12 @@
 ;; finished. So the chord stays armed mid-word, and the timing carries it: two
 ;; keys landing within combo-timeout of each other is a gesture, not typing.
 ;;
-;; The window is not free: it delays F and J themselves, so a shortcut starting
-;; on either is eaten when its target follows inside combo-timeout. Only those
-;; two keys pay it. This was previously blamed on chords delaying the whole
-;; keyboard, which was wrong: the config measured then also chorded D+F and J+K,
-;; so the keys that looked like innocent bystanders were participants.
+;; The window used to cost more than the window. Chords-v2 held its participants
+;; back from the prior-idle check, so a shortcut starting on F or J was eaten
+;; when its target followed inside combo-timeout, and F- or J-led modifier
+;; groups did not work at all. jtroo/kanata#2117 fixed that, and it is the
+;; reason this config wants 1.12.1-prerelease-1: on 1.12.0 those two keys still
+;; pay, and nothing else does.
 ;;
 ;; Meta is on A and G, mirrored on ; and H, so both a pinky and an index-finger
 ;; Meta are available to compare. Holding one never sends a lone Super to the
@@ -96,13 +101,23 @@
     up left down rght))
 
 (defvar
-  ;; Hold this long with nothing else pressed to enter the modifier layer.
-  ;; Short enough to be usable for Ctrl+click, long enough that it is only ever
-  ;; reached by dwelling on a key deliberately: any same-hand key, any completed
-  ;; opposite-hand key, and any preceding keystroke all resolve the decision
-  ;; well before it expires.
+  ;; Hold this long to enter the modifier layer. It is also the dwell limit on
+  ;; the first letter of a word that starts on the home row: rest on the S of
+  ;; "sad" longer than this and it is Alt instead. Raising it buys dwell
+  ;; tolerance and costs exactly as much extra holding to reach a shortcut,
+  ;; which lands about 40ms after this expires.
   hrm-hold 300
-  tap-repress 160
+
+  ;; Auto-repeat is reached by tapping a home-row key and then pressing it again
+  ;; within this window, which holds the letter down instead of starting another
+  ;; modifier decision. Measured from the release, that leaves about 100ms for
+  ;; the second press. The window is the same key's dead zone: while it is open
+  ;; that key cannot start a shortcut, so a tap of D followed by reaching for
+  ;; Ctrl repeats "d" instead. 500 was tried, and buying a comfortable double-tap
+  ;; costs half a second of that key each time it is tapped. Typing is unaffected
+  ;; at any value -- a replayed letter does not arm the window, so doubles like
+  ;; "add" and vim's dd are untouched.
+  tap-repress 150
 
   ;; The F+J window, and the only thing guarding it. Escape fires when both keys
   ;; land within this long; a shortcut starting on F or J is eaten if its target
@@ -150,11 +165,14 @@
   ;; always its letter. Only dwelling on the home-row key past the other key's
   ;; release produces a modifier.
   ;;
-  ;; same-hand tap is the setting that matters most. A same-hand key press ends
-  ;; the decision immediately as a letter, so "sad", "flag", "ask" and every
-  ;; other same-hand roll emits without ever entering a waiting state. Stacking
-  ;; same-hand modifiers is not this action's job; the lmods/rmods layers below
-  ;; do that, and they do it without a pending decision to stall the key queue.
+  ;; same-hand ignore is what turns a group of home-row keys on one hand into a
+  ;; group of modifiers. A same-hand press neither settles the pending decision
+  ;; nor is thrown away: it waits, and replays once the first key resolves. The
+  ;; cost lands in one place only, the first letter of a word that starts on the
+  ;; home row. That letter now emits when its key is released rather than when
+  ;; the next key is pressed, roughly 60ms later at typing speed, and dwelling
+  ;; on it past hrm-hold produces a modifier. Nothing inside a burst is touched:
+  ;; prior idle has already pinned those keys to letters before this is asked.
   ;;
   ;; neutral ignore lets a dedicated modifier stack with a pending HRM instead
   ;; of collapsing it to a tap. unknown-hand tap keeps Space tap-biased; reach
@@ -164,7 +182,7 @@
   ;; turns into an ordinary auto-repeat.
 
   hr-a (tap-hold-opposite-hand-release $hrm-hold a @hold-lmet
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -172,7 +190,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-s (tap-hold-opposite-hand-release $hrm-hold s @ml-alt
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -180,7 +198,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-d (tap-hold-opposite-hand-release $hrm-hold d @ml-ctl
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -188,7 +206,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-f (tap-hold-opposite-hand-release $hrm-hold f @ml-sft
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -196,7 +214,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-g (tap-hold-opposite-hand-release $hrm-hold g @hold-lmet
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -204,7 +222,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-h (tap-hold-opposite-hand-release $hrm-hold h @hold-rmet
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -212,7 +230,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-j (tap-hold-opposite-hand-release $hrm-hold j @mr-sft
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -220,7 +238,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-k (tap-hold-opposite-hand-release $hrm-hold k @mr-ctl
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -228,7 +246,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-l (tap-hold-opposite-hand-release $hrm-hold l @mr-alt
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)
@@ -236,7 +254,7 @@
          (tap-repress-timeout $tap-repress))
 
   hr-; (tap-hold-opposite-hand-release $hrm-hold ; @hold-rmet
-         (same-hand tap)
+         (same-hand ignore)
          (unknown-hand tap)
          $hrm-neutral
          (neutral ignore)

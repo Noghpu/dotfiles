@@ -34,9 +34,15 @@ packages:
           - zoxide
         aur:
           - carapace-bin
+          # Kept for the systemd unit and the binary's fallback; the pinned
+          # upstream build below is what the service actually runs, because the
+          # chords-v2 fix home-row modifiers need is only in a prerelease.
           - kanata
           - passage-git
-        binaries: []
+        binaries:
+          - script: kanata.sh
+            version: 1.12.1-prerelease-1
+            system: true
 
       desktop:
         repo:
